@@ -8,6 +8,19 @@ public class Reservation {
     private Integer customerId;
     private Integer cardNum;
 
+    public Reservation(String checkIn, String checkOut,
+     Float rate, Integer numOcc, String roomCode, Integer customerId,
+     Integer cardNum) {
+        this.rID = null;
+        this.checkIn = checkIn;
+        this.checkOut = checkOut;
+        this.rate = rate;
+        this.numOcc = numOcc;
+        this.roomCode = roomCode;
+        this.customerId = customerId;
+        this.cardNum = cardNum;
+    }
+    
     public Reservation(Integer rId, String checkIn, String checkOut,
      Float rate, Integer numOcc, String roomCode, Integer customerId,
      Integer cardNum) {
