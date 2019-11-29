@@ -55,7 +55,7 @@ with open(reservations_path) as csv_file_2:
             sql += '\"' + check_in.strftime("%Y-%m-%d") + '\", '
             sql += '\"' + check_out.strftime("%Y-%m-%d") + '\", '
             sql += str(row[4]) + ', '
-            sql += str(row[7] + row[8]) + ', '
+            sql += str(int(row[7]) + int(row[8])) + ', '
             sql += row[1] + ', '
             sql += str(dict[cur_key][2]) + ', ' + str(dict[cur_key][2]) + '\n\t);\n'
 
