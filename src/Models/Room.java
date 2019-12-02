@@ -1,88 +1,89 @@
-public class Room{
-	private String roomID;
-	private String roomName;
-	private Integer beds;
-	private String bedType;
-	private Integer maxOccupancy;
-	private Integer basePrice;
-	private String decor;
+package Models;
 
-	public Room() {
-		this.roomID = null;
-		this.roomName = null;
-		this.beds = null;
-		this.bedType = null;
-		this.maxOccupancy = null;
-		this.basePrice = null;
-		this.decor = null;
-	}
+public class Room {
+    private String roomID;
+    private String roomName;
+    private Integer beds;
+    private String bedType;
+    private Integer maxOccupancy;
+    private Integer basePrice;
+    private String decor;
 
-	public Room(String roomID, String roomName, Integer beds, String bedType, Integer maxOccupancy, Integer basePrice, String decor) {
-		this.roomID = roomID;
-		this.roomName = roomName;
-		this.beds = beds;
-		this.bedType = bedType;
-		this.maxOccupancy = maxOccupancy;
-		this.basePrice = basePrice;
-		this.decor = decor;
-	}
+    public Room() {
+        this.roomID = null;
+        this.roomName = null;
+        this.beds = null;
+        this.bedType = null;
+        this.maxOccupancy = null;
+        this.basePrice = null;
+        this.decor = null;
+    }
 
-	public String getRoomID() {
-		return roomID;
-	}
+    public Room(String roomID, String roomName, Integer beds, String bedType, Integer maxOccupancy, Integer basePrice, String decor) {
+        this.roomID = roomID;
+        this.roomName = roomName;
+        this.beds = beds;
+        this.bedType = bedType;
+        this.maxOccupancy = maxOccupancy;
+        this.basePrice = basePrice;
+        this.decor = decor;
+    }
 
-	public void setRoomID(String roomID) {
-		this.roomID = roomID;
-	}
+    public String getRoomID() {
+        return roomID;
+    }
 
-	public String getRoomName() {
-		return roomName;
-	}
+    public void setRoomID(String roomID) {
+        this.roomID = roomID;
+    }
 
-	public void setRoomName(String roomName) {
-		this.roomName = roomName;
-	}
+    public String getRoomName() {
+        return roomName;
+    }
 
-	public Integer getBeds() {
-		return beds;
-	}
+    public void setRoomName(String roomName) {
+        this.roomName = roomName;
+    }
 
-	public void setBeds(Integer beds) {
-		this.beds = beds;
-	}
+    public Integer getBeds() {
+        return beds;
+    }
 
-	public String getBedType() {
-		return bedType;
-	}
+    public void setBeds(Integer beds) {
+        this.beds = beds;
+    }
 
-	public void setBedType(String bedType) {
-		this.bedType = bedType;
-	}
+    public String getBedType() {
+        return bedType;
+    }
 
-	public Integer getMaxOccupancy() {
-		return maxOccupancy;
-	}
+    public void setBedType(String bedType) {
+        this.bedType = bedType;
+    }
 
-	public void setMaxOccupancy(Integer maxOccupancy) {
-		this.maxOccupancy = maxOccupancy;
-	}
+    public Integer getMaxOccupancy() {
+        return maxOccupancy;
+    }
 
-	public Integer getBasePrice() {
-		return basePrice;
-	}
+    public void setMaxOccupancy(Integer maxOccupancy) {
+        this.maxOccupancy = maxOccupancy;
+    }
 
-	public void setBasePrice(Integer basePrice) {
-		this.basePrice = basePrice;
-	}
+    public Integer getBasePrice() {
+        return basePrice;
+    }
 
-	public String getDecor() {
-		return decor;
-	}
+    public void setBasePrice(Integer basePrice) {
+        this.basePrice = basePrice;
+    }
 
-	public void setDecor(String decor){
-		this.decor = decor;
-	}
+    public String getDecor() {
+        return decor;
+    }
 
-	
+    public void setDecor(String decor) {
+        this.decor = decor;
+    }
+
 
 }

@@ -1,3 +1,5 @@
+package Models;
+
 public class Reservation {
     private Integer rID;
     private String checkIn;
@@ -9,8 +11,8 @@ public class Reservation {
     private Integer cardNum;
 
     public Reservation(String checkIn, String checkOut,
-     Float rate, Integer numOcc, String roomCode, Integer customerId,
-     Integer cardNum) {
+                       Float rate, Integer numOcc, String roomCode, Integer customerId,
+                       Integer cardNum) {
         this.rID = null;
         this.checkIn = checkIn;
         this.checkOut = checkOut;
@@ -22,8 +24,8 @@ public class Reservation {
     }
 
     public Reservation(Integer rId, String checkIn, String checkOut,
-     Float rate, Integer numOcc, String roomCode, Integer customerId,
-     Integer cardNum) {
+                       Float rate, Integer numOcc, String roomCode, Integer customerId,
+                       Integer cardNum) {
         this.rID = rID;
         this.checkIn = checkIn;
         this.checkOut = checkOut;
@@ -101,8 +103,8 @@ public class Reservation {
     @Override
     public String toString() {
         return "rID: " + rID.toString() + ", checkIn: " + checkIn +
-         ", checkOut: " + checkOut + ", rate: " + rate.toString() + ", numOcc: "
-         + numOcc + ", roomCode: " + roomCode + ", customerId: " +
-         customerId.toString() + ", cardNum: " + cardNum.toString();
+                ", checkOut: " + checkOut + ", rate: " + rate.toString() + ", numOcc: "
+                + numOcc + ", roomCode: " + roomCode + ", customerId: " +
+                customerId.toString() + ", cardNum: " + cardNum.toString();
     }
 }
