@@ -1,6 +1,7 @@
-package Daos;
+package edu.calpoly.csc365.group01.dao;
 
-import Models.CreditCard;
+import edu.calpoly.csc365.group01.entity.CreditCards;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

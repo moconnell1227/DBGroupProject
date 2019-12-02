@@ -1,4 +1,4 @@
-package Daos;
+package edu.calpoly.csc365.group01.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
