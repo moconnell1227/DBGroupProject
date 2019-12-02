@@ -1,4 +1,4 @@
-package edu.calpoly.csc365.group01.dao;
+package dao;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;

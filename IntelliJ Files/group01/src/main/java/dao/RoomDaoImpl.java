@@ -1,6 +1,6 @@
-package edu.calpoly.csc365.group01.dao;
+package dao;
 
-import edu.calpoly.csc365.group01.entity.Room;
+import entity.Room;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

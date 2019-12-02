@@ -1,8 +1,8 @@
-package edu.calpoly.csc365.group01.controller;
+package controller;
 
-import edu.calpoly.csc365.group01.dao.DaoManager;
-import edu.calpoly.csc365.group01.dao.DaoManagerFactory;
-import edu.calpoly.csc365.group01.service.AuthenticationService;
+import dao.DaoManager;
+import dao.DaoManagerFactory;
+import service.AuthenticationService;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;

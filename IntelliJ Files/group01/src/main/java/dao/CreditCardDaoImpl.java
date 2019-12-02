@@ -1,6 +1,6 @@
-package edu.calpoly.csc365.group01.dao;
+package dao;
 
-import edu.calpoly.csc365.group01.entity.CreditCard;
+import entity.CreditCard;
 
 import java.sql.*;
 import java.util.HashSet;

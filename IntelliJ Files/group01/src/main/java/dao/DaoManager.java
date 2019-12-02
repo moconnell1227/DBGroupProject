@@ -1,6 +1,6 @@
-package edu.calpoly.csc365.group01.dao;
+package dao;
 
-import edu.calpoly.csc365.group01.entity.Customer;
+import entity.Customer;
 
 import javax.sql.DataSource;
 import java.sql.Connection;

@@ -1,4 +1,4 @@
-package edu.calpoly.csc365.group01.service;
+package service;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
