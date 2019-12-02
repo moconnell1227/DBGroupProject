@@ -1,3 +1,5 @@
+package edu.calpoly.csc365.group01.dao;
+
 import java.util.Set;
 
 public interface Dao<T> {

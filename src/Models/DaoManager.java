@@ -1,3 +1,7 @@
+package edu.calpoly.csc365.group01.dao;
+
+import edu.calpoly.csc365.group01.entity.*;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 

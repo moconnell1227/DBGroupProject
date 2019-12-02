@@ -1,3 +1,5 @@
+package edu.calpoly.csc365.group01.entity;
+
 public class Reservation {
     private Integer rID;
     private String checkIn;

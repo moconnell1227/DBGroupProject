@@ -1,3 +1,5 @@
+package edu.calpoly.csc365.group01.entity;
+
 public class Room{
 	private String roomID;
 	private String roomName;
