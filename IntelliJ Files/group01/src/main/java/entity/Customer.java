@@ -1,4 +1,4 @@
-package Models;
+package edu.calpoly.csc365.group01.entity;
 
 public class Customer {
   private Integer id;
