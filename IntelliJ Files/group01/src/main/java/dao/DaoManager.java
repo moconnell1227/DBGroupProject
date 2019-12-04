@@ -5,16 +5,22 @@ import entity.Customer;
 import entity.Reservation;
 import entity.Room;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 
 public class DaoManager {
     protected ConnectionFactory connFac = null;
+    protected DataSource daoCommand;
     protected Connection conn = null;
 
     public DaoManager(ConnectionFactory connectionFactory) {
         this.connFac = connectionFactory;
+    }
+
+    public DaoManager(DataSource daoCommand) {
+        this.daoCommand = daoCommand;
     }
 
     public Connection getConnection() throws SQLException {
