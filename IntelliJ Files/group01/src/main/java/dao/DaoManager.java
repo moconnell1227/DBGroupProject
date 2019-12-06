@@ -30,6 +30,13 @@ public class DaoManager {
         return this.conn;
     }
 
+    public Connection getTransConnection() throws SQLException {
+        if (this.conn == null) {
+            this.getConnection().setAutoCommit(false);
+        }
+        return this.conn;
+    }
+
     public void close() throws SQLException {
         try {
             if (this.conn != null && !this.conn.isClosed()) {
