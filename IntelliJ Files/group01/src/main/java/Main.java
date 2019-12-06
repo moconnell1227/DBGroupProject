@@ -12,7 +12,7 @@ import java.util.Set;
 
 public class Main {
     public static void main(String args[]) {
-        String credFile = "C:\\Users\\Nick\\Documents\\GitHub\\DBGroupProject\\IntelliJ Files\\group01\\src\\main\\java\\credential.xml";
+        String credFile = "./src/main/java/credential.xml";
         Properties properties = new Properties();
         FileInputStream fis = null;
 
