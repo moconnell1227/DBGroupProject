@@ -33,12 +33,16 @@ public class RoomDaoImpl implements Dao<Room> {
 
     @Override
     public Room getById(int id) {
+        return null;
+    }
+
+    public Room getByCode(String code) {
         Room room = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         try {
             preparedStatement = this.conn.prepareStatement("SELECT * FROM Rooms WHERE CODE = ?");
-            preparedStatement.setInt(1, id);
+            preparedStatement.setString(1, code);
             resultSet = preparedStatement.executeQuery();
             Set<Room> rooms = unpackResultSet(resultSet);
             room = (Room) rooms.toArray()[0];
@@ -59,6 +63,14 @@ public class RoomDaoImpl implements Dao<Room> {
             }
         }
         return room;
+    }
+
+    public int getNumOccupantsOfRoom(String code) {
+        Room room = this.getByCode(code);
+        if (room == null) {
+            return -1;
+        }
+        return room.getMaxOccupancy();
     }
 
     @Override
