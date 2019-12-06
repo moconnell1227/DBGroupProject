@@ -7,164 +7,152 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class CustomerDaoImpl implements Dao<Customer> {
-  private Connection conn;
+    private Connection conn;
 
-  public CustomerDaoImpl(Connection conn) {
-    this.conn = conn;
-  }
-
-  @Override
-  public Customer getById(int id) {
-    Customer customer = null;
-    PreparedStatement preparedStatement = null;
-    ResultSet resultSet = null;
-    try {
-      preparedStatement = this.conn.prepareStatement("SELECT * FROM Customers WHERE cID=?");
-      preparedStatement.setInt(1, id);
-      resultSet = preparedStatement.executeQuery();
-      Set<Customer> customers = unpackResultSet(resultSet);
-      customer = (Customer)customers.toArray()[0];
-    } catch (SQLException e) {
-      e.printStackTrace();
-    } finally {
-      try {
-        if (resultSet != null)
-          resultSet.close();
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
-      try {
-        if (preparedStatement != null)
-          preparedStatement.close();
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
+    public CustomerDaoImpl(Connection conn) {
+        this.conn = conn;
     }
-    return customer;
-  }
 
-  @Override
-  public Set<Customer> getAll() {
-    Set<Customer> customers = null;
-    PreparedStatement preparedStatement = null;
-    ResultSet resultSet = null;
-    try {
-      preparedStatement = this.conn.prepareStatement("SELECT * FROM Customers");
-      resultSet = preparedStatement.executeQuery();
-      customers = unpackResultSet(resultSet);
-    } catch (SQLException e) {
-      e.printStackTrace();
-    } finally {
-      try {
-        if (resultSet != null)
-          resultSet.close();
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
-      try {
-        if (preparedStatement != null)
-          preparedStatement.close();
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
+    @Override
+    public Customer getById(int id) {
+        Customer customer = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = this.conn.prepareStatement("SELECT * FROM Customers WHERE cID=?");
+            preparedStatement.setInt(1, id);
+            resultSet = preparedStatement.executeQuery();
+            Set<Customer> customers = unpackResultSet(resultSet);
+            customer = (Customer) customers.toArray()[0];
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (resultSet != null)
+                    resultSet.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                if (preparedStatement != null)
+                    preparedStatement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return customer;
     }
-    return customers;
-  }
 
-  @Override
-  public Integer insert(Customer obj) {
-    Integer id = null;
-    PreparedStatement preparedStatement = null;
-    ResultSet resultSet = null;
-    try {
-      preparedStatement = this.conn.prepareStatement(
-        "INSERT INTO Customers (firstname, lastname) VALUES (?, ?)",
-        Statement.RETURN_GENERATED_KEYS);
-      preparedStatement.setString(1, obj.getFirstName());
-      preparedStatement.setString(2, obj.getLastName());
-      int numRows = preparedStatement.executeUpdate();
-      if (numRows == 1) {
-        // get generated id
-        resultSet = preparedStatement.getGeneratedKeys();
-        if(resultSet.next())
-          id = resultSet.getInt(1);
-
-      }
-    } catch (SQLException e) {
-      e.printStackTrace();
-    } finally {
-      try {
-        if (resultSet != null)
-          resultSet.close();
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
-      try {
-        if (preparedStatement != null)
-          preparedStatement.close();
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
+    @Override
+    public Set<Customer> getAll() {
+        Set<Customer> customers = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = this.conn.prepareStatement("SELECT * FROM Customers");
+            resultSet = preparedStatement.executeQuery();
+            customers = unpackResultSet(resultSet);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (resultSet != null)
+                    resultSet.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                if (preparedStatement != null)
+                    preparedStatement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return customers;
     }
-    return id;
-  }
 
-  @Override
-  public Integer update(Customer obj) {
-    Integer numRows = 0;
-    PreparedStatement preparedStatement = null;
-    try {
-      preparedStatement = this.conn.prepareStatement(
-        "UPDATE Customers SET firstname=?, lastname=? WHERE cID=?");
-      preparedStatement.setString(1, obj.getFirstName());
-      preparedStatement.setString(2, obj.getLastName());
-      preparedStatement.setInt(3, obj.getId());
-      preparedStatement.execute();
-    } catch (SQLException e) {
-      e.printStackTrace();
-      return numRows;
-    } finally{
-      try {
-        if (preparedStatement != null)
-          preparedStatement.close();
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
+    @Override
+    public Boolean insert(Customer obj) {
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = this.conn.prepareStatement(
+                    "INSERT INTO Customers (firstname, lastname) VALUES (?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, obj.getFirstName());
+            preparedStatement.setString(2, obj.getLastName());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
     }
-    return numRows;
-  }
 
-  @Override
-  public Integer delete(Customer obj) {
-    Integer numRows = null;
-    PreparedStatement preparedStatement = null;
-    try {
-      preparedStatement = this.conn.prepareStatement("DELETE FROM Customers WHERE cID = ?");
-      preparedStatement.setInt(1, obj.getId());
-      numRows = preparedStatement.executeUpdate();
-    } catch (SQLException e) {
-      e.printStackTrace();
-    } finally{
-      try {
-        if (preparedStatement != null)
-          preparedStatement.close();
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
+    @Override
+    public Boolean update(Customer obj) {
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = this.conn.prepareStatement(
+                    "UPDATE Customers SET firstname=?, lastname=? WHERE cID=?");
+            preparedStatement.setString(1, obj.getFirstName());
+            preparedStatement.setString(2, obj.getLastName());
+            preparedStatement.setInt(3, obj.getId());
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
     }
-    return numRows;
-  }
 
-  private Set<Customer> unpackResultSet(ResultSet rs) throws SQLException {
-    Set<Customer> customers = new HashSet<Customer>();
-
-    while(rs.next()) {
-      Customer customer = new Customer(
-        rs.getInt("cID"),
-        rs.getString("FirstName"),
-        rs.getString("LastName"));
-      customers.add(customer);
+    @Override
+    public Boolean delete(Customer obj) {
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = this.conn.prepareStatement("DELETE FROM Customers WHERE cID = ?");
+            preparedStatement.setInt(1, obj.getId());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
     }
-    return customers;
-  }
+
+    private Set<Customer> unpackResultSet(ResultSet rs) throws SQLException {
+        Set<Customer> customers = new HashSet<Customer>();
+
+        while (rs.next()) {
+            Customer customer = new Customer(
+                    rs.getInt("cID"),
+                    rs.getString("FirstName"),
+                    rs.getString("LastName"));
+            customers.add(customer);
+        }
+        return customers;
+    }
 }

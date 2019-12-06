@@ -25,16 +25,18 @@ public class DaoManager {
 
     public Connection getConnection() throws SQLException {
         if (this.conn == null) {
-            this.getConnection().setAutoCommit(false);
+            this.conn = this.connFac.getConnection();
         }
         return this.conn;
     }
 
     public void close() throws SQLException {
         try {
-            if (this.conn != null && !this.conn.isClosed())
+            if (this.conn != null && !this.conn.isClosed()) {
                 this.conn.close();
+            }
         } catch (SQLException e) {
+            e.printStackTrace();
             throw e;
         }
     }
