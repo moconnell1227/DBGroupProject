@@ -37,7 +37,7 @@ public class CreditCardDaoImpl implements Dao<CreditCard> {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         try {
-            preparedStatement = this.conn.prepareStatement("SELECT * FROM CreditCard");
+            preparedStatement = this.conn.prepareStatement("SELECT * FROM CreditCards");
             resultSet = preparedStatement.executeQuery();
             creditCards = unpackResultSet(resultSet);
         } catch (SQLException e) {
@@ -52,7 +52,7 @@ public class CreditCardDaoImpl implements Dao<CreditCard> {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = this.conn.prepareStatement(
-                    "INSERT INTO CreditCard (CardNum, Balance, CardLimit, OwnerID) VALUES (?, ?, ?, ?)");
+                    "INSERT INTO CreditCards (CardNum, Balance, CardLimit, OwnerID) VALUES (?, ?, ?, ?)");
             preparedStatement.setInt(1, obj.getCardNum());
             preparedStatement.setFloat(2, obj.getCardLimit());
             preparedStatement.setFloat(3, obj.getBalance());
@@ -79,7 +79,7 @@ public class CreditCardDaoImpl implements Dao<CreditCard> {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = this.conn.prepareStatement(
-                    "UPDATE CreditCard SET Balance = ?, CardLimit = ?, OwnerID = ? WHERE CardNum = ?",
+                    "UPDATE CreditCards SET Balance = ?, CardLimit = ?, OwnerID = ? WHERE CardNum = ?",
                     Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setFloat(1, obj.getBalance());
             preparedStatement.setFloat(2, obj.getCardLimit());
@@ -106,7 +106,7 @@ public class CreditCardDaoImpl implements Dao<CreditCard> {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = this.conn.prepareStatement(
-                    "DELETE FROM CreditCard WHERE CardNum = ?");
+                    "DELETE FROM CreditCards WHERE CardNum = ?");
             preparedStatement.setInt(1, obj.getCardNum());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {

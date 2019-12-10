@@ -38,9 +38,9 @@ public class CreditCard {
     @Override
     public String toString() {
         return "Credit Card:" +
-                "\nCard Number: " + cardNum +
-                "\nBalance: " + balance +
-                "\nCard Limit: " + cardLimit +
-                "\nOwner ID: " + ownerId;
+                " Card Number: " + cardNum +
+                " Balance: " + balance +
+                " Card Limit: " + cardLimit +
+                " Owner ID: " + ownerId;
     }
 }
