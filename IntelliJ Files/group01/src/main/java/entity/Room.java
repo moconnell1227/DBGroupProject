@@ -1,16 +1,16 @@
 package entity;
 
 public class Room {
-    private String roomID;
+    private String code;
     private String roomName;
     private Integer beds;
     private String bedType;
     private Integer maxOccupancy;
-    private Float basePrice;
+    private Integer basePrice;
     private String decor;
 
     public Room() {
-        this.roomID = null;
+        this.code = null;
         this.roomName = null;
         this.beds = null;
         this.bedType = null;
@@ -19,8 +19,8 @@ public class Room {
         this.decor = null;
     }
 
-    public Room(String roomID, String roomName, Integer beds, String bedType, Integer maxOccupancy, Float basePrice, String decor) {
-        this.roomID = roomID;
+    public Room(String code, String roomName, Integer beds, String bedType, Integer maxOccupancy, Integer basePrice, String decor) {
+        this.code = code;
         this.roomName = roomName;
         this.beds = beds;
         this.bedType = bedType;
@@ -29,12 +29,12 @@ public class Room {
         this.decor = decor;
     }
 
-    public String getRoomID() {
-        return roomID;
+    public String getCode() {
+        return code;
     }
 
-    public void setRoomID(String roomID) {
-        this.roomID = roomID;
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public String getRoomName() {
@@ -69,11 +69,11 @@ public class Room {
         this.maxOccupancy = maxOccupancy;
     }
 
-    public Float getBasePrice() {
+    public Integer getBasePrice() {
         return basePrice;
     }
 
-    public void setBasePrice(Float basePrice) {
+    public void setBasePrice(Integer basePrice) {
         this.basePrice = basePrice;
     }
 
@@ -85,5 +85,9 @@ public class Room {
         this.decor = decor;
     }
 
-
+    @Override
+    public String toString() {
+        return "CODE: " + this.code + " Name: " + this.roomName + " Num_Beds: " + this.beds + " BedType: " + this.bedType +
+                " MaxOcc: " + this.maxOccupancy + " BasePrice: " + this.basePrice + " Decor: " + this.decor;
+    }
 }

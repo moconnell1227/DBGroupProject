@@ -258,13 +258,13 @@ public class RoomDaoImpl implements Dao<Room> {
 
         while (rs.next()) {
             Room reservation = new Room(
-                    rs.getString("roomID"),
-                    rs.getString("roomName"),
-                    rs.getInt("beds"),
-                    rs.getString("bedType"),
-                    rs.getInt("maxOccupancy"),
-                    rs.getFloat("basePrice"),
-                    rs.getString("decor"));
+                    rs.getString("CODE"),
+                    rs.getString("Name"),
+                    rs.getInt("Num_Beds"),
+                    rs.getString("BedType"),
+                    rs.getInt("MaxOcc"),
+                    rs.getInt("BasePrice"),
+                    rs.getString("Decor"));
             reservations.add(reservation);
         }
         return reservations;
