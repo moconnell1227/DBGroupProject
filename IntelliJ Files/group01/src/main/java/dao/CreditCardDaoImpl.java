@@ -48,15 +48,13 @@ public class CreditCardDaoImpl implements Dao<CreditCard> {
 
     @Override
     public Boolean insert(CreditCard obj) {
-        Integer cardNumber = null;
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = this.conn.prepareStatement(
-                    "INSERT INTO CreditCards (CardNum, Balance, CardLimit, OwnerID) VALUES (?, ?, ?, ?)");
-            preparedStatement.setInt(1, obj.getCardNum());
-            preparedStatement.setFloat(2, obj.getCardLimit());
-            preparedStatement.setFloat(3, obj.getBalance());
-            preparedStatement.setInt(4, obj.getOwnerId());
+                    "INSERT INTO CreditCards (Balance, CardLimit, OwnerID) VALUES (?, ?, ?, ?)");
+            preparedStatement.setFloat(1, obj.getCardLimit());
+            preparedStatement.setFloat(2, obj.getBalance());
+            preparedStatement.setInt(3, obj.getOwnerId());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

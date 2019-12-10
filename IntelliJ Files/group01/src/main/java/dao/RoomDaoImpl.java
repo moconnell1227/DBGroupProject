@@ -18,17 +18,75 @@ public class RoomDaoImpl implements Dao<Room> {
 
     @Override
     public Boolean insert(Room obj) {
-        return null;
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = this.conn.prepareStatement(
+                    "INSERT INTO Rooms (Name, Num_Beds, BedType, MaxOCC, BasePrice, Decor) VALUES (?, ?, ?, ?, ?, ?)");
+            preparedStatement.setString(1, obj.getRoomName());
+            preparedStatement.setInt(2, obj.getMaxOccupancy());
+            preparedStatement.setString(3, obj.getBedType());
+            preparedStatement.setInt(4, obj.getMaxOccupancy());
+            preparedStatement.setInt(5, obj.getBasePrice());
+            preparedStatement.setString(6, obj.getDecor());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return true;
     }
 
     @Override
     public Boolean update(Room obj) {
-        return null;
+        try {
+            PreparedStatement preparedStatement = this.conn.prepareStatement(
+                    "UPDATE Rooms SET Name=?, Num_Beds=?, BedType=?, MaxOcc=?, " +
+                            "BasePrice=?, Decor=?, WHERE CODE=?");
+            preparedStatement.setString(1, obj.getRoomName());
+            preparedStatement.setInt(2, obj.getBeds());
+            preparedStatement.setString(3, obj.getBedType());
+            preparedStatement.setInt(4, obj.getMaxOccupancy());
+            preparedStatement.setInt(5, obj.getBasePrice());
+            preparedStatement.setString(6, obj.getDecor());
+            preparedStatement.setString(7, obj.getCode());
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     @Override
     public Boolean delete(Room obj) {
-        return null;
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = this.conn.prepareStatement(
+                    "DELETE FROM Rooms WHERE CODE = ?");
+            preparedStatement.setString(1, obj.getCode());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        } finally {
+            try {
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return true;
     }
 
     @Override
@@ -80,156 +138,6 @@ public class RoomDaoImpl implements Dao<Room> {
         ResultSet resultSet = null;
         try {
             preparedStatement = this.conn.prepareStatement("SELECT * FROM Rooms");
-            resultSet = preparedStatement.executeQuery();
-            rooms = unpackResultSet(resultSet);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (resultSet != null)
-                    resultSet.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return rooms;
-    }
-
-    public Set<Room> getByDecor(String decor) {
-        Set<Room> rooms = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        try {
-            preparedStatement = this.conn.prepareStatement("Select * FROM Rooms WHERE decor = ?");
-            preparedStatement.setString(1, decor);
-            resultSet = preparedStatement.executeQuery();
-            rooms = unpackResultSet(resultSet);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (resultSet != null)
-                    resultSet.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return rooms;
-    }
-
-    public Set<Room> getByBedType(String bedType) {
-        Set<Room> rooms = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        try {
-            preparedStatement = this.conn.prepareStatement("Select * FROM Rooms WHERE bedType = ?");
-            preparedStatement.setString(1, bedType);
-            resultSet = preparedStatement.executeQuery();
-            rooms = unpackResultSet(resultSet);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (resultSet != null)
-                    resultSet.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return rooms;
-    }
-
-    public Set<Room> getByPriceRange(Integer min, Integer max) {
-        Set<Room> rooms = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        String sMin = Integer.toString(min);
-        String sMax = Integer.toString(max);
-        try {
-            preparedStatement = this.conn.prepareStatement("Select * FROM Rooms WHERE basePrice >= ? AND basePrice <= ?");
-            preparedStatement.setString(1, sMin);
-            preparedStatement.setString(1, sMax);
-            resultSet = preparedStatement.executeQuery();
-            rooms = unpackResultSet(resultSet);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (resultSet != null)
-                    resultSet.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return rooms;
-    }
-
-    public Set<Room> getByOccupancy(Integer occupants) {
-        Set<Room> rooms = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        String sOccupants = Integer.toString(occupants);
-        try {
-            preparedStatement = this.conn.prepareStatement("Select * FROM Rooms WHERE maxOcc >= ?");
-            preparedStatement.setString(1, sOccupants);
-            resultSet = preparedStatement.executeQuery();
-            rooms = unpackResultSet(resultSet);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (resultSet != null)
-                    resultSet.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                if (preparedStatement != null) {
-                    preparedStatement.close();
-                }
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return rooms;
-    }
-
-    public Set<Room> getByNumBeds(Integer numBeds) {
-        Set<Room> rooms = null;
-        PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-        String sNumBeds = Integer.toString(numBeds);
-        try {
-            preparedStatement = this.conn.prepareStatement("Select * FROM Rooms WHERE Num_Beds = ?");
-            preparedStatement.setString(1, sNumBeds);
             resultSet = preparedStatement.executeQuery();
             rooms = unpackResultSet(resultSet);
         } catch (SQLException e) {
