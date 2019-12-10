@@ -2,6 +2,7 @@ import dao.Dao;
 import dao.DaoManager;
 import dao.ConnectionFactory;
 import entity.Customer;
+import entity.Reservation;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -31,10 +32,10 @@ public class Main {
                     properties.getProperty("user"),
                     properties.getProperty("pass")
             ));
-            Dao<Customer> customerDao = daoManager.getCustomerDao();
-            Set<Customer> customers = customerDao.getAll();
-            for (Customer customer : customers) {
-                System.out.println(customer);
+            Dao<Reservation> reservationDao = daoManager.getReservationDao();
+            Set<Reservation> reservations = reservationDao.getAll();
+            for (Reservation reservation : reservations) {
+                System.out.println(reservation);
             }
         } catch (IOException e) {
             e.printStackTrace();
