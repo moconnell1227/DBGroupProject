@@ -1,0 +1,575 @@
+Index: src/main/java/dao/ReservationDaoImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package dao;\r\n\r\nimport entity.Reservation;\r\n\r\nimport java.sql.Connection;\r\nimport java.sql.PreparedStatement;\r\nimport java.sql.ResultSet;\r\nimport java.sql.SQLException;\r\nimport java.util.HashSet;\r\nimport java.util.Set;\r\n\r\npublic class ReservationDaoImpl implements Dao<Reservation> {\r\n  private Connection conn;\r\n\r\n  public ReservationDaoImpl(Connection conn) {\r\n    this.conn = conn;\r\n  }\r\n\r\n  @Override\r\n  public Reservation getById(int id) {\r\n    Reservation reservation = null;\r\n    PreparedStatement preparedStatement = null;\r\n    ResultSet resultSet = null;\r\n    try {\r\n      preparedStatement = this.conn.prepareStatement(\"SELECT * FROM Reservations WHERE rID=?\");\r\n      preparedStatement.setInt(1, id);\r\n      resultSet = preparedStatement.executeQuery();\r\n      Set<Reservation> reservations = unpackResultSet(resultSet);\r\n      reservation = (Reservation)reservations.toArray()[0];\r\n    } catch (SQLException e) {\r\n      e.printStackTrace();\r\n    } finally {\r\n      try {\r\n        if (resultSet != null)\r\n          resultSet.close();\r\n      } catch (SQLException e) {\r\n        e.printStackTrace();\r\n      }\r\n      try {\r\n        if (preparedStatement != null)\r\n          preparedStatement.close();\r\n      } catch (SQLException e) {\r\n        e.printStackTrace();\r\n      }\r\n    }\r\n    return reservation;\r\n  }\r\n\r\n  @Override\r\n  public Set<Reservation> getAll() {\r\n    Set<Reservation> reservations = null;\r\n    PreparedStatement preparedStatement = null;\r\n    ResultSet resultSet = null;\r\n    try {\r\n      preparedStatement = this.conn.prepareStatement(\"SELECT * FROM Reservations\");\r\n      resultSet = preparedStatement.executeQuery();\r\n      reservations = unpackResultSet(resultSet);\r\n    } catch (SQLException e) {\r\n      e.printStackTrace();\r\n    } finally {\r\n      try {\r\n        if (resultSet != null)\r\n          resultSet.close();\r\n      } catch (SQLException e) {\r\n        e.printStackTrace();\r\n      }\r\n      try {\r\n        if (preparedStatement != null)\r\n          preparedStatement.close();\r\n      } catch (SQLException e) {\r\n        e.printStackTrace();\r\n      }\r\n    }\r\n    return reservations;\r\n  }\r\n\r\n  @Override\r\n  public Boolean insert(Reservation obj) {\r\n    return null;\r\n  }\r\n\r\n  @Override\r\n  public Boolean update(Reservation obj) {\r\n    try {\r\n      PreparedStatement preparedStatement = this.conn.prepareStatement(\r\n        \"UPDATE Reservation SET CheckIn=?, CheckOut=?, Rate=?, NumOcc=?, \" +\r\n        \"RoomCode=?, CustomerId=?, CardNum=?, WHERE rID=?\");\r\n      preparedStatement.setString(1, obj.getCheckIn());\r\n      preparedStatement.setString(2, obj.getCheckOut());\r\n      preparedStatement.setFloat(3, obj.getRate());\r\n      preparedStatement.setInt(4, obj.getNumOcc());\r\n      preparedStatement.setString(5, obj.getRoomCode());\r\n      preparedStatement.setInt(5, obj.getCustomerId());\r\n      preparedStatement.setInt(5, obj.getCardNum());\r\n      preparedStatement.setInt(5, obj.getRID());\r\n      preparedStatement.execute();\r\n    } catch (SQLException e) {\r\n      e.printStackTrace();\r\n      return false;\r\n    }\r\n    return true;\r\n  }\r\n\r\n  @Override\r\n  public Boolean delete(Reservation obj) {\r\n    return null;\r\n  }\r\n\r\n  private Set<Reservation> unpackResultSet(ResultSet rs) throws SQLException {\r\n    Set<Reservation> reservations = new HashSet<Reservation>();\r\n\r\n    while(rs.next()) {\r\n      Reservation reservation = new Reservation(\r\n        rs.getInt(\"rID\"),\r\n        rs.getString(\"CheckIn\"),\r\n        rs.getString(\"CheckOut\"),\r\n        rs.getFloat(\"Rate\"),\r\n        rs.getInt(\"NumOcc\"),\r\n        rs.getString(\"RoomCode\"),\r\n        rs.getInt(\"CustomerId\"),\r\n        rs.getInt(\"CardNum\"));\r\n      reservations.add(reservation);\r\n    }\r\n    return reservations;\r\n  }\r\n\r\n  @Override\r\n  protected void finalize() throws Throwable {\r\n    super.finalize();\r\n  }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/dao/ReservationDaoImpl.java	(revision 04be72b48c48932df4e2f9c3d575c95160a8ebea)
++++ src/main/java/dao/ReservationDaoImpl.java	(date 1575488818207)
+@@ -76,6 +76,11 @@
+ 
+   @Override
+   public Boolean insert(Reservation obj) {
++    try {
++      PreparedStatement preparedStatement = this.conn.prepareStatement(
++              "INSERT Reservations (CheckIn, CheckOut, Rate, NumOcc, RoomCode, CustomerId, CardNum)" +
++                      " VALUES (?, ?, ?, ?, ?, ?, ?)");
++    }
+     return null;
+   }
+ 
+@@ -83,7 +88,7 @@
+   public Boolean update(Reservation obj) {
+     try {
+       PreparedStatement preparedStatement = this.conn.prepareStatement(
+-        "UPDATE Reservation SET CheckIn=?, CheckOut=?, Rate=?, NumOcc=?, " +
++        "UPDATE Reservations SET CheckIn=?, CheckOut=?, Rate=?, NumOcc=?, " +
+         "RoomCode=?, CustomerId=?, CardNum=?, WHERE rID=?");
+       preparedStatement.setString(1, obj.getCheckIn());
+       preparedStatement.setString(2, obj.getCheckOut());
+@@ -124,6 +129,8 @@
+     return reservations;
+   }
+ 
++  private Reservation createReservation()
++
+   @Override
+   protected void finalize() throws Throwable {
+     super.finalize();
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"0d07eebf-69b8-45da-951f-9abb844cd9c4\" name=\"Default Changelist\" comment=\"\" />\r\n    <ignored path=\"$PROJECT_DIR$/target/\" />\r\n    <option name=\"EXCLUDED_CONVERTED_TO_IGNORED\" value=\"true\" />\r\n    <option name=\"TRACKING_ENABLED\" value=\"true\" />\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileEditorManager\">\r\n    <leaf SIDE_TABS_SIZE_LIMIT_KEY=\"300\">\r\n      <file leaf-file-name=\"RoomDaoImpl.java\" pinned=\"false\" current-in-tab=\"false\">\r\n        <entry file=\"file://$PROJECT_DIR$/src/main/java/dao/RoomDaoImpl.java\">\r\n          <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n            <state relative-caret-position=\"3417\">\r\n              <caret line=\"210\" column=\"8\" selection-start-line=\"210\" selection-start-column=\"8\" selection-end-line=\"210\" selection-end-column=\"8\" />\r\n              <folding>\r\n                <element signature=\"imports\" expanded=\"true\" />\r\n              </folding>\r\n            </state>\r\n          </provider>\r\n        </entry>\r\n      </file>\r\n      <file leaf-file-name=\"CreditCard.java\" pinned=\"false\" current-in-tab=\"false\">\r\n        <entry file=\"file://$PROJECT_DIR$/src/main/java/entity/CreditCard.java\">\r\n          <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n            <state relative-caret-position=\"136\">\r\n              <caret line=\"8\" column=\"76\" selection-start-line=\"8\" selection-start-column=\"76\" selection-end-line=\"8\" selection-end-column=\"76\" />\r\n            </state>\r\n          </provider>\r\n        </entry>\r\n      </file>\r\n      <file leaf-file-name=\"AuthenticationService.java\" pinned=\"false\" current-in-tab=\"false\">\r\n        <entry file=\"file://$PROJECT_DIR$/src/main/java/service/AuthenticationService.java\">\r\n          <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n            <state relative-caret-position=\"85\">\r\n              <caret line=\"5\" column=\"13\" selection-start-line=\"5\" selection-start-column=\"13\" selection-end-line=\"5\" selection-end-column=\"13\" />\r\n              <folding>\r\n                <element signature=\"imports\" expanded=\"true\" />\r\n              </folding>\r\n            </state>\r\n          </provider>\r\n        </entry>\r\n      </file>\r\n      <file leaf-file-name=\"TestServlet.java\" pinned=\"false\" current-in-tab=\"false\">\r\n        <entry file=\"file://$PROJECT_DIR$/src/main/java/TestServlet.java\">\r\n          <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n            <state relative-caret-position=\"51\">\r\n              <caret line=\"10\" column=\"13\" selection-start-line=\"10\" selection-start-column=\"13\" selection-end-line=\"10\" selection-end-column=\"13\" />\r\n            </state>\r\n          </provider>\r\n        </entry>\r\n      </file>\r\n      <file leaf-file-name=\"ConnectionFactory.java\" pinned=\"false\" current-in-tab=\"false\">\r\n        <entry file=\"file://$PROJECT_DIR$/src/main/java/dao/ConnectionFactory.java\">\r\n          <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n            <state relative-caret-position=\"476\">\r\n              <caret line=\"28\" column=\"20\" lean-forward=\"true\" selection-start-line=\"28\" selection-start-column=\"20\" selection-end-line=\"28\" selection-end-column=\"20\" />\r\n              <folding>\r\n                <element signature=\"imports\" expanded=\"true\" />\r\n              </folding>\r\n            </state>\r\n          </provider>\r\n        </entry>\r\n      </file>\r\n      <file leaf-file-name=\"credential.xml\" pinned=\"false\" current-in-tab=\"false\">\r\n        <entry file=\"file://$PROJECT_DIR$/src/main/java/credential.xml\">\r\n          <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n            <state relative-caret-position=\"119\">\r\n              <caret line=\"7\" column=\"13\" lean-forward=\"true\" selection-start-line=\"7\" selection-start-column=\"13\" selection-end-line=\"7\" selection-end-column=\"13\" />\r\n            </state>\r\n          </provider>\r\n        </entry>\r\n      </file>\r\n      <file leaf-file-name=\"Main.java\" pinned=\"false\" current-in-tab=\"false\">\r\n        <entry file=\"file://$PROJECT_DIR$/src/main/java/Main.java\">\r\n          <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n            <state relative-caret-position=\"485\">\r\n              <caret line=\"41\" column=\"32\" selection-start-line=\"41\" selection-start-column=\"32\" selection-end-line=\"41\" selection-end-column=\"32\" />\r\n              <folding>\r\n                <element signature=\"imports\" expanded=\"true\" />\r\n              </folding>\r\n            </state>\r\n          </provider>\r\n        </entry>\r\n      </file>\r\n      <file leaf-file-name=\"DaoManager.java\" pinned=\"false\" current-in-tab=\"true\">\r\n        <entry file=\"file://$PROJECT_DIR$/src/main/java/dao/DaoManager.java\">\r\n          <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n            <state relative-caret-position=\"170\">\r\n              <caret line=\"10\" column=\"30\" lean-forward=\"true\" selection-start-line=\"10\" selection-end-line=\"11\" />\r\n              <folding>\r\n                <element signature=\"imports\" expanded=\"true\" />\r\n                <element signature=\"e#276#277#0\" expanded=\"true\" />\r\n                <element signature=\"e#314#315#0\" expanded=\"true\" />\r\n              </folding>\r\n            </state>\r\n          </provider>\r\n        </entry>\r\n      </file>\r\n      <file leaf-file-name=\"LoginServlet.java\" pinned=\"false\" current-in-tab=\"false\">\r\n        <entry file=\"file://$PROJECT_DIR$/src/main/java/controller/LoginServlet.java\">\r\n          <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n            <state relative-caret-position=\"68\">\r\n              <caret line=\"15\" column=\"13\" selection-start-line=\"15\" selection-start-column=\"13\" selection-end-line=\"15\" selection-end-column=\"13\" />\r\n              <folding>\r\n                <element signature=\"imports\" expanded=\"true\" />\r\n              </folding>\r\n            </state>\r\n          </provider>\r\n        </entry>\r\n      </file>\r\n      <file leaf-file-name=\"CustomerDaoImpl.java\" pinned=\"false\" current-in-tab=\"false\">\r\n        <entry file=\"file://$PROJECT_DIR$/src/main/java/dao/CustomerDaoImpl.java\">\r\n          <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n            <state relative-caret-position=\"68\">\r\n              <caret line=\"8\" column=\"13\" selection-start-line=\"8\" selection-start-column=\"13\" selection-end-line=\"8\" selection-end-column=\"13\" />\r\n              <folding>\r\n                <element signature=\"imports\" expanded=\"true\" />\r\n              </folding>\r\n            </state>\r\n          </provider>\r\n        </entry>\r\n      </file>\r\n    </leaf>\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Class\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"FindInProjectRecents\">\r\n    <findStrings>\r\n      <find>edu.calpoly.csc365.group01.</find>\r\n    </findStrings>\r\n  </component>\r\n  <component name=\"IdeDocumentHistory\">\r\n    <option name=\"CHANGED_PATHS\">\r\n      <list>\r\n        <option value=\"$PROJECT_DIR$/src/main/java/controller/CustomerServlet.java\" />\r\n        <option value=\"$PROJECT_DIR$/src/main/java/controller/LoginServlet.java\" />\r\n        <option value=\"$PROJECT_DIR$/src/main/java/dao/CreditCardDaoImpl.java\" />\r\n        <option value=\"$PROJECT_DIR$/src/main/java/dao/CustomerDaoImpl.java\" />\r\n        <option value=\"$PROJECT_DIR$/src/main/java/dao/Dao.java\" />\r\n        <option value=\"$PROJECT_DIR$/src/main/java/dao/DaoCommand.java\" />\r\n        <option value=\"$PROJECT_DIR$/src/main/java/dao/DaoManager.java\" />\r\n        <option value=\"$PROJECT_DIR$/src/main/java/dao/DaoManagerFactory.java\" />\r\n        <option value=\"$PROJECT_DIR$/src/main/java/dao/ReservationDaoImpl.java\" />\r\n        <option value=\"$PROJECT_DIR$/src/main/java/dao/RoomDaoImpl.java\" />\r\n        <option value=\"$PROJECT_DIR$/src/main/java/entity/CreditCard.java\" />\r\n        <option value=\"$PROJECT_DIR$/src/main/java/entity/Customer.java\" />\r\n        <option value=\"$PROJECT_DIR$/src/main/java/entity/Reservation.java\" />\r\n        <option value=\"$PROJECT_DIR$/src/main/java/entity/Room.java\" />\r\n        <option value=\"$PROJECT_DIR$/src/main/java/service/AuthenticationService.java\" />\r\n        <option value=\"$PROJECT_DIR$/src/main/java/TestServlet.java\" />\r\n        <option value=\"$PROJECT_DIR$/src/main/java/dao/ConnectionFactory.java\" />\r\n        <option value=\"$PROJECT_DIR$/src/main/java/credential.xml\" />\r\n        <option value=\"$PROJECT_DIR$/src/main/java/Main.java\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"MavenImportPreferences\">\r\n    <option name=\"importingSettings\">\r\n      <MavenImportingSettings>\r\n        <option name=\"importAutomatically\" value=\"true\" />\r\n      </MavenImportingSettings>\r\n    </option>\r\n  </component>\r\n  <component name=\"ProjectFrameBounds\" extendedState=\"6\">\r\n    <option name=\"x\" value=\"-15\" />\r\n    <option name=\"y\" value=\"-15\" />\r\n    <option name=\"width\" value=\"3875\" />\r\n    <option name=\"height\" value=\"2095\" />\r\n  </component>\r\n  <component name=\"ProjectId\" id=\"1TyeUUkrsPOBPQKnjmcDNG6NT79\" />\r\n  <component name=\"ProjectView\">\r\n    <navigator proportions=\"\" version=\"1\">\r\n      <foldersAlwaysOnTop value=\"true\" />\r\n    </navigator>\r\n    <panes>\r\n      <pane id=\"ProjectPane\">\r\n        <subPane>\r\n          <expand>\r\n            <path>\r\n              <item name=\"group01\" type=\"b2602c69:ProjectViewProjectNode\" />\r\n              <item name=\"group01\" type=\"462c0819:PsiDirectoryNode\" />\r\n            </path>\r\n            <path>\r\n              <item name=\"group01\" type=\"b2602c69:ProjectViewProjectNode\" />\r\n              <item name=\"group01\" type=\"462c0819:PsiDirectoryNode\" />\r\n              <item name=\"src\" type=\"462c0819:PsiDirectoryNode\" />\r\n            </path>\r\n            <path>\r\n              <item name=\"group01\" type=\"b2602c69:ProjectViewProjectNode\" />\r\n              <item name=\"group01\" type=\"462c0819:PsiDirectoryNode\" />\r\n              <item name=\"src\" type=\"462c0819:PsiDirectoryNode\" />\r\n              <item name=\"main\" type=\"462c0819:PsiDirectoryNode\" />\r\n            </path>\r\n            <path>\r\n              <item name=\"group01\" type=\"b2602c69:ProjectViewProjectNode\" />\r\n              <item name=\"group01\" type=\"462c0819:PsiDirectoryNode\" />\r\n              <item name=\"src\" type=\"462c0819:PsiDirectoryNode\" />\r\n              <item name=\"main\" type=\"462c0819:PsiDirectoryNode\" />\r\n              <item name=\"java\" type=\"462c0819:PsiDirectoryNode\" />\r\n            </path>\r\n            <path>\r\n              <item name=\"group01\" type=\"b2602c69:ProjectViewProjectNode\" />\r\n              <item name=\"group01\" type=\"462c0819:PsiDirectoryNode\" />\r\n              <item name=\"src\" type=\"462c0819:PsiDirectoryNode\" />\r\n              <item name=\"main\" type=\"462c0819:PsiDirectoryNode\" />\r\n              <item name=\"java\" type=\"462c0819:PsiDirectoryNode\" />\r\n              <item name=\"dao\" type=\"462c0819:PsiDirectoryNode\" />\r\n            </path>\r\n          </expand>\r\n          <select />\r\n        </subPane>\r\n      </pane>\r\n      <pane id=\"AndroidView\" />\r\n      <pane id=\"PackagesPane\">\r\n        <subPane>\r\n          <expand>\r\n            <path>\r\n              <item name=\"group01\" type=\"58d84e3e:PackageViewProjectNode\" />\r\n              <item name=\"example_webapp1\" type=\"616d4139:PackageViewModuleNode\" />\r\n            </path>\r\n          </expand>\r\n          <select />\r\n        </subPane>\r\n      </pane>\r\n      <pane id=\"Scope\" />\r\n    </panes>\r\n  </component>\r\n  <component name=\"PropertiesComponent\">\r\n    <property name=\"WebServerToolWindowFactoryState\" value=\"false\" />\r\n    <property name=\"aspect.path.notification.shown\" value=\"true\" />\r\n    <property name=\"last_opened_file_path\" value=\"$PROJECT_DIR$\" />\r\n    <property name=\"show.migrate.to.gradle.popup\" value=\"false\" />\r\n  </component>\r\n  <component name=\"RecentsManager\">\r\n    <key name=\"CopyFile.RECENT_KEYS\">\r\n      <recent name=\"C:\\Users\\Matt\\IdeaProjects\\example_webapp1\\src\\main\\java\\edu\\calpoly\\csc365\\example1\\controller\" />\r\n      <recent name=\"C:\\Users\\Matt\\IdeaProjects\\example_webapp1\\src\\main\\webapp\" />\r\n      <recent name=\"C:\\Users\\Matt\\IdeaProjects\\example_webapp1\\src\\main\\java\\edu\\calpoly\\csc365\\example1\\service\" />\r\n      <recent name=\"C:\\Users\\Matt\\IdeaProjects\\example_webapp1\\src\\main\\webapp\\META-INF\" />\r\n      <recent name=\"C:\\Users\\Matt\\IdeaProjects\\example_webapp1\\src\\main\\java\\edu\\calpoly\\csc365\\example1\" />\r\n    </key>\r\n  </component>\r\n  <component name=\"RunDashboard\">\r\n    <option name=\"ruleStates\">\r\n      <list>\r\n        <RuleState>\r\n          <option name=\"name\" value=\"ConfigurationTypeDashboardGroupingRule\" />\r\n        </RuleState>\r\n        <RuleState>\r\n          <option name=\"name\" value=\"StatusDashboardGroupingRule\" />\r\n        </RuleState>\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"RunManager\">\r\n    <configuration name=\"example_webapp1 [clean,compile,war:war...]\" type=\"MavenRunConfiguration\" factoryName=\"Maven\" nameIsGenerated=\"true\">\r\n      <MavenSettings>\r\n        <option name=\"myGeneralSettings\" />\r\n        <option name=\"myRunnerSettings\" />\r\n        <option name=\"myRunnerParameters\">\r\n          <MavenRunnerParameters>\r\n            <option name=\"profiles\">\r\n              <set />\r\n            </option>\r\n            <option name=\"goals\">\r\n              <list>\r\n                <option value=\"clean\" />\r\n                <option value=\"compile\" />\r\n                <option value=\"war:war\" />\r\n                <option value=\"tomcat7:run\" />\r\n              </list>\r\n            </option>\r\n            <option name=\"pomFileName\" />\r\n            <option name=\"profilesMap\">\r\n              <map />\r\n            </option>\r\n            <option name=\"resolveToWorkspace\" value=\"false\" />\r\n            <option name=\"workingDirPath\" value=\"$PROJECT_DIR$\" />\r\n          </MavenRunnerParameters>\r\n        </option>\r\n      </MavenSettings>\r\n    </configuration>\r\n  </component>\r\n  <component name=\"SvnConfiguration\">\r\n    <configuration />\r\n  </component>\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"0d07eebf-69b8-45da-951f-9abb844cd9c4\" name=\"Default Changelist\" comment=\"\" />\r\n      <created>1574436780258</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1574436780258</updated>\r\n      <workItem from=\"1574436794073\" duration=\"6833000\" />\r\n      <workItem from=\"1575247725588\" duration=\"198000\" />\r\n    </task>\r\n    <servers />\r\n  </component>\r\n  <component name=\"ToolWindowManager\">\r\n    <frame x=\"-6\" y=\"-6\" width=\"1549\" height=\"837\" extended-state=\"6\" />\r\n    <editor active=\"true\" />\r\n    <layout>\r\n      <window_info anchor=\"right\" id=\"Palette\" order=\"3\" />\r\n      <window_info anchor=\"bottom\" id=\"TODO\" order=\"6\" />\r\n      <window_info anchor=\"right\" id=\"Palette&#9;\" order=\"3\" />\r\n      <window_info id=\"Image Layers\" order=\"2\" />\r\n      <window_info anchor=\"right\" id=\"Capture Analysis\" order=\"3\" />\r\n      <window_info anchor=\"bottom\" id=\"Event Log\" order=\"7\" side_tool=\"true\" />\r\n      <window_info anchor=\"bottom\" id=\"Flutter Performance\" order=\"7\" side_tool=\"true\" />\r\n      <window_info anchor=\"right\" id=\"Maven Projects\" order=\"3\" />\r\n      <window_info anchor=\"bottom\" id=\"Version Control\" order=\"7\" show_stripe_button=\"false\" />\r\n      <window_info anchor=\"bottom\" id=\"Run\" order=\"2\" />\r\n      <window_info anchor=\"bottom\" id=\"Terminal\" order=\"7\" />\r\n      <window_info anchor=\"right\" id=\"Flutter Outline\" order=\"3\" />\r\n      <window_info id=\"Capture Tool\" order=\"2\" />\r\n      <window_info id=\"Designer\" order=\"2\" />\r\n      <window_info active=\"true\" content_ui=\"combo\" id=\"Project\" order=\"0\" visible=\"true\" weight=\"0.25285044\" />\r\n      <window_info id=\"Structure\" order=\"1\" side_tool=\"true\" weight=\"0.25\" />\r\n      <window_info anchor=\"right\" id=\"Ant Build\" order=\"1\" weight=\"0.25\" />\r\n      <window_info id=\"UI Designer\" order=\"2\" />\r\n      <window_info anchor=\"right\" id=\"Theme Preview\" order=\"3\" />\r\n      <window_info id=\"Favorites\" order=\"2\" side_tool=\"true\" />\r\n      <window_info anchor=\"bottom\" id=\"Debug\" order=\"3\" weight=\"0.4\" />\r\n      <window_info anchor=\"right\" id=\"Flutter Inspector\" order=\"3\" />\r\n      <window_info anchor=\"right\" content_ui=\"combo\" id=\"Hierarchy\" order=\"2\" weight=\"0.25\" />\r\n      <window_info anchor=\"bottom\" id=\"Inspection\" order=\"5\" weight=\"0.4\" />\r\n      <window_info anchor=\"right\" id=\"Commander\" order=\"0\" weight=\"0.4\" />\r\n      <window_info anchor=\"bottom\" id=\"Message\" order=\"0\" />\r\n      <window_info anchor=\"bottom\" id=\"Cvs\" order=\"4\" weight=\"0.25\" />\r\n      <window_info anchor=\"bottom\" id=\"Find\" order=\"1\" weight=\"0.32859176\" />\r\n    </layout>\r\n  </component>\r\n  <component name=\"TypeScriptGeneratedFilesManager\">\r\n    <option name=\"version\" value=\"1\" />\r\n  </component>\r\n  <component name=\"VcsContentAnnotationSettings\">\r\n    <option name=\"myLimit\" value=\"2678400000\" />\r\n  </component>\r\n  <component name=\"editorHistoryManager\">\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/dao/RoomDaoImpl.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"3417\">\r\n          <caret line=\"210\" column=\"8\" selection-start-line=\"210\" selection-start-column=\"8\" selection-end-line=\"210\" selection-end-column=\"8\" />\r\n          <folding>\r\n            <element signature=\"imports\" expanded=\"true\" />\r\n          </folding>\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/entity/Customer.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"34\">\r\n          <caret line=\"2\" column=\"18\" selection-start-line=\"2\" selection-start-column=\"18\" selection-end-line=\"2\" selection-end-column=\"18\" />\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/entity/Reservation.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"34\">\r\n          <caret line=\"2\" column=\"18\" selection-start-line=\"2\" selection-start-column=\"18\" selection-end-line=\"2\" selection-end-column=\"18\" />\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/entity/Room.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"34\">\r\n          <caret line=\"2\" column=\"18\" selection-start-line=\"2\" selection-start-column=\"18\" selection-end-line=\"2\" selection-end-column=\"18\" />\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/service/AuthenticationService.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"34\">\r\n          <caret line=\"2\" column=\"17\" selection-start-line=\"2\" selection-start-column=\"17\" selection-end-line=\"2\" selection-end-column=\"17\" />\r\n          <folding>\r\n            <element signature=\"imports\" expanded=\"true\" />\r\n          </folding>\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/controller/CustomerServlet.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"170\">\r\n          <caret line=\"10\" column=\"27\" selection-start-line=\"10\" selection-end-line=\"11\" />\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/dao/CreditCardDaoImpl.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"68\">\r\n          <caret line=\"8\" column=\"13\" selection-start-line=\"8\" selection-start-column=\"13\" selection-end-line=\"8\" selection-end-column=\"13\" />\r\n          <folding>\r\n            <element signature=\"imports\" expanded=\"true\" />\r\n          </folding>\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/dao/CustomerDaoImpl.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"68\">\r\n          <caret line=\"8\" column=\"13\" selection-start-line=\"8\" selection-start-column=\"13\" selection-end-line=\"8\" selection-end-column=\"13\" />\r\n          <folding>\r\n            <element signature=\"imports\" expanded=\"true\" />\r\n          </folding>\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/entity/CreditCard.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"136\">\r\n          <caret line=\"8\" column=\"76\" selection-start-line=\"8\" selection-start-column=\"76\" selection-end-line=\"8\" selection-end-column=\"76\" />\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/dao/Dao.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"34\">\r\n          <caret line=\"2\" column=\"21\" selection-start-line=\"2\" selection-start-column=\"21\" selection-end-line=\"2\" selection-end-column=\"21\" />\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/dao/DaoCommand.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"34\">\r\n          <caret line=\"2\" column=\"21\" selection-start-line=\"2\" selection-start-column=\"21\" selection-end-line=\"2\" selection-end-column=\"21\" />\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/dao/DaoManagerFactory.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"34\">\r\n          <caret line=\"2\" column=\"21\" selection-start-line=\"2\" selection-start-column=\"21\" selection-end-line=\"2\" selection-end-column=\"21\" />\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/dao/ReservationDaoImpl.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"68\">\r\n          <caret line=\"4\" column=\"6\" selection-start-line=\"4\" selection-start-column=\"6\" selection-end-line=\"4\" selection-end-column=\"6\" />\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/entity/Customer.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"34\">\r\n          <caret line=\"2\" column=\"18\" selection-start-line=\"2\" selection-start-column=\"18\" selection-end-line=\"2\" selection-end-column=\"18\" />\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/entity/Reservation.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"34\">\r\n          <caret line=\"2\" column=\"18\" selection-start-line=\"2\" selection-start-column=\"18\" selection-end-line=\"2\" selection-end-column=\"18\" />\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/entity/Room.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"34\">\r\n          <caret line=\"2\" column=\"18\" selection-start-line=\"2\" selection-start-column=\"18\" selection-end-line=\"2\" selection-end-column=\"18\" />\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/controller/CustomerServlet.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"170\">\r\n          <caret line=\"10\" column=\"27\" selection-start-line=\"10\" selection-end-line=\"11\" />\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/dao/CreditCardDaoImpl.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"68\">\r\n          <caret line=\"8\" column=\"13\" selection-start-line=\"8\" selection-start-column=\"13\" selection-end-line=\"8\" selection-end-column=\"13\" />\r\n          <folding>\r\n            <element signature=\"imports\" expanded=\"true\" />\r\n          </folding>\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/dao/CustomerDaoImpl.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"68\">\r\n          <caret line=\"8\" column=\"13\" selection-start-line=\"8\" selection-start-column=\"13\" selection-end-line=\"8\" selection-end-column=\"13\" />\r\n          <folding>\r\n            <element signature=\"imports\" expanded=\"true\" />\r\n          </folding>\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/dao/RoomDaoImpl.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"3417\">\r\n          <caret line=\"210\" column=\"8\" selection-start-line=\"210\" selection-start-column=\"8\" selection-end-line=\"210\" selection-end-column=\"8\" />\r\n          <folding>\r\n            <element signature=\"imports\" expanded=\"true\" />\r\n          </folding>\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/entity/CreditCard.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"136\">\r\n          <caret line=\"8\" column=\"76\" selection-start-line=\"8\" selection-start-column=\"76\" selection-end-line=\"8\" selection-end-column=\"76\" />\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/service/AuthenticationService.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"85\">\r\n          <caret line=\"5\" column=\"13\" selection-start-line=\"5\" selection-start-column=\"13\" selection-end-line=\"5\" selection-end-column=\"13\" />\r\n          <folding>\r\n            <element signature=\"imports\" expanded=\"true\" />\r\n          </folding>\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/controller/LoginServlet.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"68\">\r\n          <caret line=\"15\" column=\"13\" selection-start-line=\"15\" selection-start-column=\"13\" selection-end-line=\"15\" selection-end-column=\"13\" />\r\n          <folding>\r\n            <element signature=\"imports\" expanded=\"true\" />\r\n          </folding>\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/TestServlet.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"51\">\r\n          <caret line=\"10\" column=\"13\" selection-start-line=\"10\" selection-start-column=\"13\" selection-end-line=\"10\" selection-end-column=\"13\" />\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/credential.xml\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"119\">\r\n          <caret line=\"7\" column=\"13\" lean-forward=\"true\" selection-start-line=\"7\" selection-start-column=\"13\" selection-end-line=\"7\" selection-end-column=\"13\" />\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/dao/ConnectionFactory.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"476\">\r\n          <caret line=\"28\" column=\"20\" lean-forward=\"true\" selection-start-line=\"28\" selection-start-column=\"20\" selection-end-line=\"28\" selection-end-column=\"20\" />\r\n          <folding>\r\n            <element signature=\"imports\" expanded=\"true\" />\r\n          </folding>\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/Main.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"485\">\r\n          <caret line=\"41\" column=\"32\" selection-start-line=\"41\" selection-start-column=\"32\" selection-end-line=\"41\" selection-end-column=\"32\" />\r\n          <folding>\r\n            <element signature=\"imports\" expanded=\"true\" />\r\n          </folding>\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n    <entry file=\"file://$PROJECT_DIR$/src/main/java/dao/DaoManager.java\">\r\n      <provider selected=\"true\" editor-type-id=\"text-editor\">\r\n        <state relative-caret-position=\"170\">\r\n          <caret line=\"10\" column=\"30\" lean-forward=\"true\" selection-start-line=\"10\" selection-end-line=\"11\" />\r\n          <folding>\r\n            <element signature=\"imports\" expanded=\"true\" />\r\n            <element signature=\"e#276#277#0\" expanded=\"true\" />\r\n            <element signature=\"e#314#315#0\" expanded=\"true\" />\r\n          </folding>\r\n        </state>\r\n      </provider>\r\n    </entry>\r\n  </component>\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .idea/workspace.xml	(revision 04be72b48c48932df4e2f9c3d575c95160a8ebea)
++++ .idea/workspace.xml	(date 1575650104290)
+@@ -1,132 +1,16 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="ChangeListManager">
+-    <list default="true" id="0d07eebf-69b8-45da-951f-9abb844cd9c4" name="Default Changelist" comment="" />
+-    <ignored path="$PROJECT_DIR$/target/" />
++    <list default="true" id="0d07eebf-69b8-45da-951f-9abb844cd9c4" name="Default Changelist" comment="">
++      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/src/main/java/dao/ReservationDaoImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dao/ReservationDaoImpl.java" afterDir="false" />
++    </list>
+     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+-    <option name="TRACKING_ENABLED" value="true" />
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+     <option name="LAST_RESOLUTION" value="IGNORE" />
+   </component>
+-  <component name="FileEditorManager">
+-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+-      <file leaf-file-name="RoomDaoImpl.java" pinned="false" current-in-tab="false">
+-        <entry file="file://$PROJECT_DIR$/src/main/java/dao/RoomDaoImpl.java">
+-          <provider selected="true" editor-type-id="text-editor">
+-            <state relative-caret-position="3417">
+-              <caret line="210" column="8" selection-start-line="210" selection-start-column="8" selection-end-line="210" selection-end-column="8" />
+-              <folding>
+-                <element signature="imports" expanded="true" />
+-              </folding>
+-            </state>
+-          </provider>
+-        </entry>
+-      </file>
+-      <file leaf-file-name="CreditCard.java" pinned="false" current-in-tab="false">
+-        <entry file="file://$PROJECT_DIR$/src/main/java/entity/CreditCard.java">
+-          <provider selected="true" editor-type-id="text-editor">
+-            <state relative-caret-position="136">
+-              <caret line="8" column="76" selection-start-line="8" selection-start-column="76" selection-end-line="8" selection-end-column="76" />
+-            </state>
+-          </provider>
+-        </entry>
+-      </file>
+-      <file leaf-file-name="AuthenticationService.java" pinned="false" current-in-tab="false">
+-        <entry file="file://$PROJECT_DIR$/src/main/java/service/AuthenticationService.java">
+-          <provider selected="true" editor-type-id="text-editor">
+-            <state relative-caret-position="85">
+-              <caret line="5" column="13" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
+-              <folding>
+-                <element signature="imports" expanded="true" />
+-              </folding>
+-            </state>
+-          </provider>
+-        </entry>
+-      </file>
+-      <file leaf-file-name="TestServlet.java" pinned="false" current-in-tab="false">
+-        <entry file="file://$PROJECT_DIR$/src/main/java/TestServlet.java">
+-          <provider selected="true" editor-type-id="text-editor">
+-            <state relative-caret-position="51">
+-              <caret line="10" column="13" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="13" />
+-            </state>
+-          </provider>
+-        </entry>
+-      </file>
+-      <file leaf-file-name="ConnectionFactory.java" pinned="false" current-in-tab="false">
+-        <entry file="file://$PROJECT_DIR$/src/main/java/dao/ConnectionFactory.java">
+-          <provider selected="true" editor-type-id="text-editor">
+-            <state relative-caret-position="476">
+-              <caret line="28" column="20" lean-forward="true" selection-start-line="28" selection-start-column="20" selection-end-line="28" selection-end-column="20" />
+-              <folding>
+-                <element signature="imports" expanded="true" />
+-              </folding>
+-            </state>
+-          </provider>
+-        </entry>
+-      </file>
+-      <file leaf-file-name="credential.xml" pinned="false" current-in-tab="false">
+-        <entry file="file://$PROJECT_DIR$/src/main/java/credential.xml">
+-          <provider selected="true" editor-type-id="text-editor">
+-            <state relative-caret-position="119">
+-              <caret line="7" column="13" lean-forward="true" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
+-            </state>
+-          </provider>
+-        </entry>
+-      </file>
+-      <file leaf-file-name="Main.java" pinned="false" current-in-tab="false">
+-        <entry file="file://$PROJECT_DIR$/src/main/java/Main.java">
+-          <provider selected="true" editor-type-id="text-editor">
+-            <state relative-caret-position="485">
+-              <caret line="41" column="32" selection-start-line="41" selection-start-column="32" selection-end-line="41" selection-end-column="32" />
+-              <folding>
+-                <element signature="imports" expanded="true" />
+-              </folding>
+-            </state>
+-          </provider>
+-        </entry>
+-      </file>
+-      <file leaf-file-name="DaoManager.java" pinned="false" current-in-tab="true">
+-        <entry file="file://$PROJECT_DIR$/src/main/java/dao/DaoManager.java">
+-          <provider selected="true" editor-type-id="text-editor">
+-            <state relative-caret-position="170">
+-              <caret line="10" column="30" lean-forward="true" selection-start-line="10" selection-end-line="11" />
+-              <folding>
+-                <element signature="imports" expanded="true" />
+-                <element signature="e#276#277#0" expanded="true" />
+-                <element signature="e#314#315#0" expanded="true" />
+-              </folding>
+-            </state>
+-          </provider>
+-        </entry>
+-      </file>
+-      <file leaf-file-name="LoginServlet.java" pinned="false" current-in-tab="false">
+-        <entry file="file://$PROJECT_DIR$/src/main/java/controller/LoginServlet.java">
+-          <provider selected="true" editor-type-id="text-editor">
+-            <state relative-caret-position="68">
+-              <caret line="15" column="13" selection-start-line="15" selection-start-column="13" selection-end-line="15" selection-end-column="13" />
+-              <folding>
+-                <element signature="imports" expanded="true" />
+-              </folding>
+-            </state>
+-          </provider>
+-        </entry>
+-      </file>
+-      <file leaf-file-name="CustomerDaoImpl.java" pinned="false" current-in-tab="false">
+-        <entry file="file://$PROJECT_DIR$/src/main/java/dao/CustomerDaoImpl.java">
+-          <provider selected="true" editor-type-id="text-editor">
+-            <state relative-caret-position="68">
+-              <caret line="8" column="13" selection-start-line="8" selection-start-column="13" selection-end-line="8" selection-end-column="13" />
+-              <folding>
+-                <element signature="imports" expanded="true" />
+-              </folding>
+-            </state>
+-          </provider>
+-        </entry>
+-      </file>
+-    </leaf>
+-  </component>
+   <component name="FileTemplateManagerImpl">
+     <option name="RECENT_TEMPLATES">
+       <list>
+@@ -139,30 +23,9 @@
+       <find>edu.calpoly.csc365.group01.</find>
+     </findStrings>
+   </component>
+-  <component name="IdeDocumentHistory">
+-    <option name="CHANGED_PATHS">
+-      <list>
+-        <option value="$PROJECT_DIR$/src/main/java/controller/CustomerServlet.java" />
+-        <option value="$PROJECT_DIR$/src/main/java/controller/LoginServlet.java" />
+-        <option value="$PROJECT_DIR$/src/main/java/dao/CreditCardDaoImpl.java" />
+-        <option value="$PROJECT_DIR$/src/main/java/dao/CustomerDaoImpl.java" />
+-        <option value="$PROJECT_DIR$/src/main/java/dao/Dao.java" />
+-        <option value="$PROJECT_DIR$/src/main/java/dao/DaoCommand.java" />
+-        <option value="$PROJECT_DIR$/src/main/java/dao/DaoManager.java" />
+-        <option value="$PROJECT_DIR$/src/main/java/dao/DaoManagerFactory.java" />
+-        <option value="$PROJECT_DIR$/src/main/java/dao/ReservationDaoImpl.java" />
+-        <option value="$PROJECT_DIR$/src/main/java/dao/RoomDaoImpl.java" />
+-        <option value="$PROJECT_DIR$/src/main/java/entity/CreditCard.java" />
+-        <option value="$PROJECT_DIR$/src/main/java/entity/Customer.java" />
+-        <option value="$PROJECT_DIR$/src/main/java/entity/Reservation.java" />
+-        <option value="$PROJECT_DIR$/src/main/java/entity/Room.java" />
+-        <option value="$PROJECT_DIR$/src/main/java/service/AuthenticationService.java" />
+-        <option value="$PROJECT_DIR$/src/main/java/TestServlet.java" />
+-        <option value="$PROJECT_DIR$/src/main/java/dao/ConnectionFactory.java" />
+-        <option value="$PROJECT_DIR$/src/main/java/credential.xml" />
+-        <option value="$PROJECT_DIR$/src/main/java/Main.java" />
+-      </list>
+-    </option>
++  <component name="Git.Settings">
++    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
++    <option name="UPDATE_CHANGES_POLICY" value="SHELVE" />
+   </component>
+   <component name="MavenImportPreferences">
+     <option name="importingSettings">
+@@ -178,63 +41,7 @@
+     <option name="height" value="2095" />
+   </component>
+   <component name="ProjectId" id="1TyeUUkrsPOBPQKnjmcDNG6NT79" />
+-  <component name="ProjectView">
+-    <navigator proportions="" version="1">
+-      <foldersAlwaysOnTop value="true" />
+-    </navigator>
+-    <panes>
+-      <pane id="ProjectPane">
+-        <subPane>
+-          <expand>
+-            <path>
+-              <item name="group01" type="b2602c69:ProjectViewProjectNode" />
+-              <item name="group01" type="462c0819:PsiDirectoryNode" />
+-            </path>
+-            <path>
+-              <item name="group01" type="b2602c69:ProjectViewProjectNode" />
+-              <item name="group01" type="462c0819:PsiDirectoryNode" />
+-              <item name="src" type="462c0819:PsiDirectoryNode" />
+-            </path>
+-            <path>
+-              <item name="group01" type="b2602c69:ProjectViewProjectNode" />
+-              <item name="group01" type="462c0819:PsiDirectoryNode" />
+-              <item name="src" type="462c0819:PsiDirectoryNode" />
+-              <item name="main" type="462c0819:PsiDirectoryNode" />
+-            </path>
+-            <path>
+-              <item name="group01" type="b2602c69:ProjectViewProjectNode" />
+-              <item name="group01" type="462c0819:PsiDirectoryNode" />
+-              <item name="src" type="462c0819:PsiDirectoryNode" />
+-              <item name="main" type="462c0819:PsiDirectoryNode" />
+-              <item name="java" type="462c0819:PsiDirectoryNode" />
+-            </path>
+-            <path>
+-              <item name="group01" type="b2602c69:ProjectViewProjectNode" />
+-              <item name="group01" type="462c0819:PsiDirectoryNode" />
+-              <item name="src" type="462c0819:PsiDirectoryNode" />
+-              <item name="main" type="462c0819:PsiDirectoryNode" />
+-              <item name="java" type="462c0819:PsiDirectoryNode" />
+-              <item name="dao" type="462c0819:PsiDirectoryNode" />
+-            </path>
+-          </expand>
+-          <select />
+-        </subPane>
+-      </pane>
+-      <pane id="AndroidView" />
+-      <pane id="PackagesPane">
+-        <subPane>
+-          <expand>
+-            <path>
+-              <item name="group01" type="58d84e3e:PackageViewProjectNode" />
+-              <item name="example_webapp1" type="616d4139:PackageViewModuleNode" />
+-            </path>
+-          </expand>
+-          <select />
+-        </subPane>
+-      </pane>
+-      <pane id="Scope" />
+-    </panes>
+-  </component>
++  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+   <component name="PropertiesComponent">
+     <property name="WebServerToolWindowFactoryState" value="false" />
+     <property name="aspect.path.notification.shown" value="true" />
+@@ -289,6 +96,7 @@
+           </MavenRunnerParameters>
+         </option>
+       </MavenSettings>
++      <method v="2" />
+     </configuration>
+   </component>
+   <component name="SvnConfiguration">
+@@ -305,281 +113,8 @@
+       <workItem from="1575247725588" duration="198000" />
+     </task>
+     <servers />
+-  </component>
+-  <component name="ToolWindowManager">
+-    <frame x="-6" y="-6" width="1549" height="837" extended-state="6" />
+-    <editor active="true" />
+-    <layout>
+-      <window_info anchor="right" id="Palette" order="3" />
+-      <window_info anchor="bottom" id="TODO" order="6" />
+-      <window_info anchor="right" id="Palette&#9;" order="3" />
+-      <window_info id="Image Layers" order="2" />
+-      <window_info anchor="right" id="Capture Analysis" order="3" />
+-      <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
+-      <window_info anchor="bottom" id="Flutter Performance" order="7" side_tool="true" />
+-      <window_info anchor="right" id="Maven Projects" order="3" />
+-      <window_info anchor="bottom" id="Version Control" order="7" show_stripe_button="false" />
+-      <window_info anchor="bottom" id="Run" order="2" />
+-      <window_info anchor="bottom" id="Terminal" order="7" />
+-      <window_info anchor="right" id="Flutter Outline" order="3" />
+-      <window_info id="Capture Tool" order="2" />
+-      <window_info id="Designer" order="2" />
+-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25285044" />
+-      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+-      <window_info id="UI Designer" order="2" />
+-      <window_info anchor="right" id="Theme Preview" order="3" />
+-      <window_info id="Favorites" order="2" side_tool="true" />
+-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+-      <window_info anchor="right" id="Flutter Inspector" order="3" />
+-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+-      <window_info anchor="right" id="Commander" order="0" weight="0.4" />
+-      <window_info anchor="bottom" id="Message" order="0" />
+-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+-      <window_info anchor="bottom" id="Find" order="1" weight="0.32859176" />
+-    </layout>
+   </component>
+   <component name="TypeScriptGeneratedFilesManager">
+     <option name="version" value="1" />
+   </component>
+-  <component name="VcsContentAnnotationSettings">
+-    <option name="myLimit" value="2678400000" />
+-  </component>
+-  <component name="editorHistoryManager">
+-    <entry file="file://$PROJECT_DIR$/src/main/java/dao/RoomDaoImpl.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="3417">
+-          <caret line="210" column="8" selection-start-line="210" selection-start-column="8" selection-end-line="210" selection-end-column="8" />
+-          <folding>
+-            <element signature="imports" expanded="true" />
+-          </folding>
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/entity/Customer.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="34">
+-          <caret line="2" column="18" selection-start-line="2" selection-start-column="18" selection-end-line="2" selection-end-column="18" />
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/entity/Reservation.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="34">
+-          <caret line="2" column="18" selection-start-line="2" selection-start-column="18" selection-end-line="2" selection-end-column="18" />
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/entity/Room.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="34">
+-          <caret line="2" column="18" selection-start-line="2" selection-start-column="18" selection-end-line="2" selection-end-column="18" />
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/service/AuthenticationService.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="34">
+-          <caret line="2" column="17" selection-start-line="2" selection-start-column="17" selection-end-line="2" selection-end-column="17" />
+-          <folding>
+-            <element signature="imports" expanded="true" />
+-          </folding>
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/controller/CustomerServlet.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="170">
+-          <caret line="10" column="27" selection-start-line="10" selection-end-line="11" />
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/dao/CreditCardDaoImpl.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="68">
+-          <caret line="8" column="13" selection-start-line="8" selection-start-column="13" selection-end-line="8" selection-end-column="13" />
+-          <folding>
+-            <element signature="imports" expanded="true" />
+-          </folding>
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/dao/CustomerDaoImpl.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="68">
+-          <caret line="8" column="13" selection-start-line="8" selection-start-column="13" selection-end-line="8" selection-end-column="13" />
+-          <folding>
+-            <element signature="imports" expanded="true" />
+-          </folding>
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/entity/CreditCard.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="136">
+-          <caret line="8" column="76" selection-start-line="8" selection-start-column="76" selection-end-line="8" selection-end-column="76" />
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/dao/Dao.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="34">
+-          <caret line="2" column="21" selection-start-line="2" selection-start-column="21" selection-end-line="2" selection-end-column="21" />
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/dao/DaoCommand.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="34">
+-          <caret line="2" column="21" selection-start-line="2" selection-start-column="21" selection-end-line="2" selection-end-column="21" />
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/dao/DaoManagerFactory.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="34">
+-          <caret line="2" column="21" selection-start-line="2" selection-start-column="21" selection-end-line="2" selection-end-column="21" />
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/dao/ReservationDaoImpl.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="68">
+-          <caret line="4" column="6" selection-start-line="4" selection-start-column="6" selection-end-line="4" selection-end-column="6" />
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/entity/Customer.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="34">
+-          <caret line="2" column="18" selection-start-line="2" selection-start-column="18" selection-end-line="2" selection-end-column="18" />
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/entity/Reservation.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="34">
+-          <caret line="2" column="18" selection-start-line="2" selection-start-column="18" selection-end-line="2" selection-end-column="18" />
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/entity/Room.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="34">
+-          <caret line="2" column="18" selection-start-line="2" selection-start-column="18" selection-end-line="2" selection-end-column="18" />
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/controller/CustomerServlet.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="170">
+-          <caret line="10" column="27" selection-start-line="10" selection-end-line="11" />
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/dao/CreditCardDaoImpl.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="68">
+-          <caret line="8" column="13" selection-start-line="8" selection-start-column="13" selection-end-line="8" selection-end-column="13" />
+-          <folding>
+-            <element signature="imports" expanded="true" />
+-          </folding>
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/dao/CustomerDaoImpl.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="68">
+-          <caret line="8" column="13" selection-start-line="8" selection-start-column="13" selection-end-line="8" selection-end-column="13" />
+-          <folding>
+-            <element signature="imports" expanded="true" />
+-          </folding>
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/dao/RoomDaoImpl.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="3417">
+-          <caret line="210" column="8" selection-start-line="210" selection-start-column="8" selection-end-line="210" selection-end-column="8" />
+-          <folding>
+-            <element signature="imports" expanded="true" />
+-          </folding>
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/entity/CreditCard.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="136">
+-          <caret line="8" column="76" selection-start-line="8" selection-start-column="76" selection-end-line="8" selection-end-column="76" />
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/service/AuthenticationService.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="85">
+-          <caret line="5" column="13" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
+-          <folding>
+-            <element signature="imports" expanded="true" />
+-          </folding>
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/controller/LoginServlet.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="68">
+-          <caret line="15" column="13" selection-start-line="15" selection-start-column="13" selection-end-line="15" selection-end-column="13" />
+-          <folding>
+-            <element signature="imports" expanded="true" />
+-          </folding>
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/TestServlet.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="51">
+-          <caret line="10" column="13" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="13" />
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/credential.xml">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="119">
+-          <caret line="7" column="13" lean-forward="true" selection-start-line="7" selection-start-column="13" selection-end-line="7" selection-end-column="13" />
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/dao/ConnectionFactory.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="476">
+-          <caret line="28" column="20" lean-forward="true" selection-start-line="28" selection-start-column="20" selection-end-line="28" selection-end-column="20" />
+-          <folding>
+-            <element signature="imports" expanded="true" />
+-          </folding>
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/Main.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="485">
+-          <caret line="41" column="32" selection-start-line="41" selection-start-column="32" selection-end-line="41" selection-end-column="32" />
+-          <folding>
+-            <element signature="imports" expanded="true" />
+-          </folding>
+-        </state>
+-      </provider>
+-    </entry>
+-    <entry file="file://$PROJECT_DIR$/src/main/java/dao/DaoManager.java">
+-      <provider selected="true" editor-type-id="text-editor">
+-        <state relative-caret-position="170">
+-          <caret line="10" column="30" lean-forward="true" selection-start-line="10" selection-end-line="11" />
+-          <folding>
+-            <element signature="imports" expanded="true" />
+-            <element signature="e#276#277#0" expanded="true" />
+-            <element signature="e#314#315#0" expanded="true" />
+-          </folding>
+-        </state>
+-      </provider>
+-    </entry>
+-  </component>
+ </project>
+\ No newline at end of file
