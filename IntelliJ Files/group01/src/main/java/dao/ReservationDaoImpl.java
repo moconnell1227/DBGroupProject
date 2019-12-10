@@ -121,10 +121,11 @@ public class ReservationDaoImpl implements Dao<Reservation> {
     @Override
     public Boolean delete(Reservation obj) {
         try {
-            PreparedStatement prepareStatement = this.conn.prepareStatement(
+            PreparedStatement preparedStatement = this.conn.prepareStatement(
                     "DELETE FROM Reservations WHERE rID=?"
             );
-            prepareStatement.setInt(1, obj.getRID());
+            preparedStatement.setInt(1, obj.getRID());
+            preparedStatement.execute();
             return true;
         } catch (SQLException e) {
             e.printStackTrace();
