@@ -76,7 +76,24 @@ public class ReservationDaoImpl implements Dao<Reservation> {
 
     @Override
     public Boolean insert(Reservation obj) {
-        return null;
+        try {
+            PreparedStatement preparedStatement = this.conn.prepareStatement(
+                    "INSERT INTO Reservations (CheckIn, CheckOut, Rate, " +
+                            "NumOcc, RoomCode, CustomerId, CardNum) VALUES (?,?,?,?,?,?,?)"
+            );
+            preparedStatement.setString(1, obj.getCheckIn());
+            preparedStatement.setString(2, obj.getCheckOut());
+            preparedStatement.setFloat(3, obj.getRate());
+            preparedStatement.setInt(4, obj.getNumOcc());
+            preparedStatement.setString(5, obj.getRoomCode());
+            preparedStatement.setInt(6, obj.getCustomerId());
+            preparedStatement.setInt(7, obj.getCardNum());
+            preparedStatement.execute();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     @Override
@@ -84,7 +101,7 @@ public class ReservationDaoImpl implements Dao<Reservation> {
         try {
             PreparedStatement preparedStatement = this.conn.prepareStatement(
                     "UPDATE Reservation SET CheckIn=?, CheckOut=?, Rate=?, NumOcc=?, " +
-                            "RoomCode=?, CustomerId=?, CardNum=?, WHERE rID=?");
+                            "RoomCode=?, CustomerId=?, CardNum=? WHERE rID=?");
             preparedStatement.setString(1, obj.getCheckIn());
             preparedStatement.setString(2, obj.getCheckOut());
             preparedStatement.setFloat(3, obj.getRate());
@@ -103,7 +120,16 @@ public class ReservationDaoImpl implements Dao<Reservation> {
 
     @Override
     public Boolean delete(Reservation obj) {
-        return null;
+        try {
+            PreparedStatement prepareStatement = this.conn.prepareStatement(
+                    "DELETE FROM Reservations WHERE rID=?"
+            );
+            prepareStatement.setInt(1, obj.getRID());
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     private Set<Reservation> unpackResultSet(ResultSet rs) throws SQLException {
