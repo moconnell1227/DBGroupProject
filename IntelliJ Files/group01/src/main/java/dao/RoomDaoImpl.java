@@ -2,10 +2,7 @@ package dao;
 
 import entity.Room;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -158,6 +155,41 @@ public class RoomDaoImpl implements Dao<Room> {
             }
         }
         return rooms;
+    }
+
+    public Set<Room> getAvailableRooms(String checkin, String checkout, int minOcc) {
+        Set<Room> availableRooms = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = this.conn.prepareStatement("select * from Rooms where CODE not in (" +
+                    "select distinct CODE from Reservations join (" +
+                    "select distinct CODE from Rooms" +
+                    ") codes on RoomCode=CODE " +
+                    "where CheckIn >= ? and CheckOut <= ?" +
+                    ") and MaxOcc >= ?");
+            preparedStatement.setDate(1, Date.valueOf(checkin));
+            preparedStatement.setDate(2, Date.valueOf(checkout));
+            preparedStatement.setInt(3, minOcc);
+            resultSet = preparedStatement.executeQuery();
+            availableRooms = unpackResultSet(resultSet);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (resultSet != null)
+                    resultSet.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                if (preparedStatement != null)
+                    preparedStatement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return availableRooms;
     }
 
 

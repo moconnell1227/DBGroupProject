@@ -1,6 +1,7 @@
 import dao.Dao;
 import dao.DaoManager;
 import dao.ConnectionFactory;
+import dao.RoomDaoImpl;
 import entity.CreditCard;
 import entity.Customer;
 import entity.Reservation;
@@ -34,9 +35,9 @@ public class Main {
                     properties.getProperty("user"),
                     properties.getProperty("pass")
             ));
-            Dao<CreditCard> reservationDao = daoManager.getCreditCardDao();
-            Set<CreditCard> reservations = reservationDao.getAll();
-            for (CreditCard reservation : reservations) {
+            RoomDaoImpl reservationDao = (RoomDaoImpl) daoManager.getRoomDao();
+            Set<Room> reservations = reservationDao.getAvailableRooms("2010-01-01", "2010-01-10", 2);
+            for (Room reservation : reservations) {
                 System.out.println(reservation);
             }
         } catch (IOException e) {
