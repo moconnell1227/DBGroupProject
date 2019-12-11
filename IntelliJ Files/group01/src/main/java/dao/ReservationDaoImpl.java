@@ -1,5 +1,6 @@
 package dao;
 
+import entity.MonthlyRevenue;
 import entity.Reservation;
 
 import java.sql.Connection;
@@ -8,6 +9,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Map;
+import java.util.HashMap;
 
 public class ReservationDaoImpl implements Dao<Reservation> {
     private Connection conn;
@@ -45,6 +48,74 @@ public class ReservationDaoImpl implements Dao<Reservation> {
         }
         return reservation;
     }
+
+    public void displayRevenues() {
+        Set<MonthlyRevenue> revenues = getRevenue();
+        int totalRev = getTotalRevenue(revenues);
+        Map<String, int[]> roomRevenues = createRoomRevenues(revenues);
+        for (Map.Entry<String, int[]> room : roomRevenues.entrySet()) {
+            System.out.print("Room: " + room.getKey());
+            for (int i = 1; i < 12; i++) {
+                System.out.print(", Month: " + i + ", Revenue: " + room.getValue()[i-1]);
+            }
+            System.out.println(", Total Revenue: " + totalRev);
+        }
+    }
+
+    public Map<String, int[]> createRoomRevenues(Set<MonthlyRevenue> revenues) {
+        Map<String, int[]> roomRevenues = new HashMap<String, int[]>();
+
+        for (MonthlyRevenue r : revenues) {
+            if (roomRevenues.containsKey(r.getRoom())) {
+                roomRevenues.get(r.getRoom())[r.getMonth()-1] = r.getRevenue();
+            } else {
+                roomRevenues.put(r.getRoom(), new int[12]);
+                roomRevenues.get(r.getRoom())[r.getMonth()-1] = r.getRevenue();
+            }
+        }
+        return roomRevenues;
+    }
+
+    public int getTotalRevenue(Set<MonthlyRevenue> revenues) {
+        int total = 0;
+        for (MonthlyRevenue r : revenues) {
+            total += r.getRevenue();
+        }
+        return total;
+    }
+
+    public Set<MonthlyRevenue> getRevenue() {
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        Set<MonthlyRevenue> revenues = null;
+        try {
+            preparedStatement = this.conn.prepareStatement("SELECT RoomCode, month(CheckIn) as month, " +
+                  "count(RoomCode) as c, " +
+                  "round(sum(datediff(checkout, checkin)*rate), 2) as r " +
+                  "from Reservations " +
+                  "group by RoomCode, month " +
+                  "order by RoomCode, month");
+            resultSet = preparedStatement.executeQuery();
+            revenues = unpackResultSetRevenue(resultSet);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (resultSet != null)
+                    resultSet.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                if (preparedStatement != null)
+                    preparedStatement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return revenues;
+    }
+
 
     @Override
     public Set<Reservation> getAll() {
@@ -151,6 +222,19 @@ public class ReservationDaoImpl implements Dao<Reservation> {
         return reservations;
     }
 
+    private Set<MonthlyRevenue> unpackResultSetRevenue(ResultSet rs) throws SQLException {
+        Set<MonthlyRevenue> revenues = new HashSet<MonthlyRevenue>();
+
+        while (rs.next()) {
+            MonthlyRevenue monthlyRevenue = new MonthlyRevenue(
+                    rs.getInt("month"),
+                    rs.getString("RoomCode"),
+                    rs.getInt("r")
+            );
+            revenues.add(monthlyRevenue);
+        }
+        return revenues;
+    }
 
     @Override
     protected void finalize() throws Throwable {
