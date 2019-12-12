@@ -23,6 +23,42 @@ public class CustomerDaoImpl implements Dao<Customer> {
             preparedStatement.setInt(1, id);
             resultSet = preparedStatement.executeQuery();
             Set<Customer> customers = unpackResultSet(resultSet);
+            if (customers.size() == 0) {
+                return null;
+            }
+            customer = (Customer) customers.toArray()[0];
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (resultSet != null)
+                    resultSet.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                if (preparedStatement != null)
+                    preparedStatement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return customer;
+    }
+
+    public Customer getByFirstLast(String first, String last) {
+        Customer customer = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = this.conn.prepareStatement("SELECT * FROM Customers WHERE FirstName=? and LastName=?");
+            preparedStatement.setString(1, first);
+            preparedStatement.setString(2, last);
+            resultSet = preparedStatement.executeQuery();
+            Set<Customer> customers = unpackResultSet(resultSet);
+            if (customers.size() == 0) {
+                return null;
+            }
             customer = (Customer) customers.toArray()[0];
         } catch (SQLException e) {
             e.printStackTrace();

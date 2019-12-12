@@ -14,7 +14,7 @@ FOR EACH ROW
 BEGIN
     IF EXISTS
         (SELECT * FROM Reservations
-        WHERE NEW.RoomCode = RoomCode AND NEW.CheckIn <= CheckOut AND NEW.CheckOut >= CheckIn)
+        WHERE NEW.RoomCode = RoomCode AND NEW.CheckIn <= CheckIn AND NEW.CheckOut >= CheckOut)
 
     THEN
         SIGNAL SQLSTATE '99999'
@@ -94,8 +94,8 @@ BEGIN
         SET MESSAGE_TEXT = 'This Credit Card Does Not Exist';
     END IF;
 
-    set @bal = (select balance from CreditCards where CardNum = NEW.CardNum) + NEW.Rate;
-    set @lim = (select `limit` from CreditCards where CardNum = NEW.CardNum);
+    set @bal = (select Balance from CreditCards where CardNum = NEW.CardNum) + (datediff(NEW.CheckOut, NEW.CheckIn)*NEW.Rate);
+    set @lim = (select CardLimit from CreditCards where CardNum = NEW.CardNum);
 
     IF (@bal > @lim)
     then
@@ -122,13 +122,13 @@ BEGIN
         SET MESSAGE_TEXT = 'This Credit Card Does Not Exist';
     END IF;
 
-    SET @bal = (SELECT balance FROM CreditCards WHERE CardNum = OLD.CardNum) - OLD.Rate;
+    SET @bal = (SELECT Balance FROM CreditCards WHERE CardNum = OLD.CardNum) - (datediff(OLD.CheckOut, OLD.CheckIn)*OLD.Rate);
     IF (@bal < 0)
     THEN
         SIGNAL SQLSTATE '99999'
         SET MESSAGE_TEXT = 'Cannot refund the balance';
     ELSE
-        UPDATE CreditCards SET balance=@bal WHERE CardNum = OLD.CardNum;
+        UPDATE CreditCards SET Balance=@bal WHERE CardNum = OLD.CardNum;
     END IF;
 END$
 DELIMITER ;

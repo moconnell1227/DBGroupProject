@@ -2,12 +2,10 @@ package dao;
 
 import entity.Room;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.HashSet;
 import java.util.Set;
+import java.math.BigDecimal;
 
 public class RoomDaoImpl implements Dao<Room> {
     private Connection conn;
@@ -131,6 +129,58 @@ public class RoomDaoImpl implements Dao<Room> {
         return room.getMaxOccupancy();
     }
 
+    private BigDecimal getPopScore(String code) {
+        BigDecimal popScore = new BigDecimal(0.00);
+        String today = "2010-09-05";
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = this.conn.prepareStatement("SELECT round((SUM(DATEDIFF(CheckOut, CheckIn)))/180, 2) AS popScore FROM Reservations LEFT JOIN Rooms ON Reservations.RoomCode = Rooms.CODE WHERE CheckIn >= DATE(? - INTERVAL 180 DAY) AND CheckOut <= ? AND Rooms.CODE = ?");
+            preparedStatement.setString(1, today);
+            preparedStatement.setString(2, today);
+            preparedStatement.setString(3, code);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                popScore = popScore.add(resultSet.getBigDecimal("popScore"));
+            }
+            preparedStatement = this.conn.prepareStatement("SELECT round(DATEDIFF(?, CheckIn)/180, 2) AS popScore FROM Reservations LEFT JOIN Rooms ON Reservations.RoomCode = Rooms.CODE WHERE CheckIn < ? AND CheckOut > ? AND Rooms.CODE = ?");
+            preparedStatement.setString(1, today);
+            preparedStatement.setString(2, today);
+            preparedStatement.setString(3, today);
+            preparedStatement.setString(4, code);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                popScore = popScore.add(resultSet.getBigDecimal("popScore"));
+            }
+            preparedStatement = this.conn.prepareStatement("SELECT round(DATEDIFF(CheckOut, DATE(? - INTERVAL 180 DAY))/180, 2) AS popScore FROM Reservations LEFT JOIN Rooms ON Reservations.RoomCode = Rooms.CODE WHERE CheckOut > DATE(? - INTERVAL 180 DAY) AND CheckIn < DATE(? - INTERVAL 180 DAY) AND Rooms.CODE = ?");
+            preparedStatement.setString(1, today);
+            preparedStatement.setString(2, today);
+            preparedStatement.setString(3, today);
+            preparedStatement.setString(4, code);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                popScore = popScore.add(resultSet.getBigDecimal("popScore"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (resultSet != null)
+                    resultSet.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                if (preparedStatement != null) {
+                    preparedStatement.close();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return popScore;
+    }
+
     @Override
     public Set<Room> getAll() {
         Set<Room> rooms = null;
@@ -160,6 +210,47 @@ public class RoomDaoImpl implements Dao<Room> {
         return rooms;
     }
 
+    public Set<Room> getAvailableRooms(String checkin, String checkout, int minOcc, String type, String decor, int maxPrice) {
+        Set<Room> availableRooms = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = this.conn.prepareStatement("select * from Rooms where CODE not in (" +
+                    "select RoomCode from Reservations where (CheckIn <= ? and CheckOut > ?)" +
+                    " or (CheckIn between ? and ?) or (CheckOut between ? and ?))" +
+                    " and MaxOcc >= ? and BedType = ? and Decor = ? and BasePrice <= ?");
+            preparedStatement.setDate(1, Date.valueOf(checkin));
+            preparedStatement.setDate(2, Date.valueOf(checkout));
+            preparedStatement.setDate(3, Date.valueOf(checkin));
+            preparedStatement.setDate(4, Date.valueOf(checkout));
+            preparedStatement.setDate(5, Date.valueOf(checkin));
+            preparedStatement.setDate(6, Date.valueOf(checkout));
+            preparedStatement.setInt(7, minOcc);
+            preparedStatement.setString(8, type);
+            preparedStatement.setString(9, decor);
+            preparedStatement.setInt(10, maxPrice);
+
+            resultSet = preparedStatement.executeQuery();
+            availableRooms = unpackResultSet(resultSet);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (resultSet != null)
+                    resultSet.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                if (preparedStatement != null)
+                    preparedStatement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return availableRooms;
+    }
+
 
     private Set<Room> unpackResultSet(ResultSet rs) throws SQLException {
         Set<Room> reservations = new HashSet<Room>();
@@ -173,6 +264,7 @@ public class RoomDaoImpl implements Dao<Room> {
                     rs.getInt("MaxOcc"),
                     rs.getInt("BasePrice"),
                     rs.getString("Decor"));
+            reservation.setPopScore(this.getPopScore(reservation.getCode()));
             reservations.add(reservation);
         }
         return reservations;

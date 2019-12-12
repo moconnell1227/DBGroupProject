@@ -1,5 +1,7 @@
 package entity;
 
+import java.math.BigDecimal;
+
 public class Room {
     private String code;
     private String roomName;
@@ -8,6 +10,7 @@ public class Room {
     private Integer maxOccupancy;
     private Integer basePrice;
     private String decor;
+    private BigDecimal popScore;
 
     public Room() {
         this.code = null;
@@ -85,9 +88,13 @@ public class Room {
         this.decor = decor;
     }
 
+    public BigDecimal getPopScore() {return popScore;}
+
+    public void setPopScore(BigDecimal popScore) {this.popScore = popScore;}
+
     @Override
     public String toString() {
         return "CODE: " + this.code + " Name: " + this.roomName + " Num_Beds: " + this.beds + " BedType: " + this.bedType +
-                " MaxOcc: " + this.maxOccupancy + " BasePrice: " + this.basePrice + " Decor: " + this.decor;
+                " MaxOcc: " + this.maxOccupancy + " BasePrice: " + this.basePrice + " Decor: " + this.decor + " PopScore: " + this.popScore;
     }
 }
