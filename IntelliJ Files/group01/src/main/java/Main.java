@@ -227,6 +227,7 @@ public class Main {
         reservationDao.delete(cancelled);
 
         System.out.println("Your reservation has been cancelled, credit card " + cancelled.getCardNum() + " has been refunded");
+        System.out.println("Cancelled reservation:\n" + cancelled);
     }
 
     private static void changeReservation(Scanner sc, ReservationDaoImpl reservationDao, RoomDaoImpl roomDao, int custId) {
