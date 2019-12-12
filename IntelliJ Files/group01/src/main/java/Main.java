@@ -54,7 +54,7 @@ public class Main {
     }
 
     private static void print_options() {
-        System.out.println("1. Make a reservation\n2. Cancel a booking\n3. Get Room information\n4. Logout\n");
+        System.out.println("1. Make a reservation\n2. Cancel a booking\n3. Get Room or Reservation information\n4. Logout\n5. Quit");
     }
 
     private static void main_loop(CreditCardDaoImpl creditCardDao, CustomerDaoImpl customerDao,
@@ -66,8 +66,9 @@ public class Main {
 
         int custId = login(sc, customerDao);
         System.out.println("\nThanks for logging in!");
+        System.out.println("Welcome to the 365-Reservation System! Please choose an option:");
         while (run) {
-            System.out.println("Welcome to the 365-Reservation System! Please choose an option:");
+            System.out.println("\nOptions:");
             print_options();
             command = Integer.parseInt(sc.nextLine());
             switch (command) {
@@ -80,12 +81,15 @@ public class Main {
                     counter = 0;
                     continue;
                 case 3: // call get room info submenu
-                    getRoomInformations(roomDao);
+                    getRoomInformations(sc, roomDao, reservationDao, custId);
                     counter = 0;
                     continue;
                 case 4:
                     custId = login(sc, customerDao);
                     continue;
+                case 5:
+                    System.out.println("Exiting...");
+                    return;
                 default:
                     System.out.print("Unsupported command. Exiting...");
                     run = false;
@@ -192,9 +196,9 @@ public class Main {
 
         boolean success = reservationDao.insert(reservation);
         if (success) {
-            System.out.println("Congrats! You made a reservation\n" + reservation + "\n");
+            System.out.println("Congrats! You made a reservation\n" + reservation);
         } else {
-            System.out.println("Sorry! Your card was declined :(((\n");
+            System.out.println("Sorry! Your card was declined :(((");
         }
     }
 
@@ -218,21 +222,38 @@ public class Main {
         Reservation cancelled = reservationMap.get(Integer.parseInt(sc.nextLine()));
         reservationDao.delete(cancelled);
 
-        System.out.println("Your reservation has been cancelled, credit card " + cancelled.getCardNum() + " has been refunded\n");
+        System.out.println("Your reservation has been cancelled, credit card " + cancelled.getCardNum() + " has been refunded");
     }
 
-    private static void getRoomInformations(RoomDaoImpl roomDao) {
-        System.out.println("You're trying to get some room info!");
+    private static void getRoomInformations(Scanner sc, RoomDaoImpl roomDao, ReservationDaoImpl reservationDao, int custId) {
+        System.out.println("You're trying to get some room info!\nOptions:");
 
-        Set<Room> rooms = roomDao.getAll();
-        if (rooms == null || rooms.size() == 0) {
-            System.out.println("Sorry no rooms were found.\n");
-            return;
-        }
+        System.out.println("1. Get All Rooms\n2. Get Your Reservations");
+        int choice = Integer.parseInt(sc.nextLine());
 
-        System.out.println("Rooms in the hotel:");
-        for (Room room : rooms) {
-            System.out.println(room);
+        switch (choice) {
+            case 1:
+                Set<Room> rooms = roomDao.getAll();
+                if (rooms == null || rooms.size() == 0) {
+                    System.out.println("Sorry no rooms were found.\n");
+                    return;
+                }
+
+                System.out.println("Rooms in the hotel:");
+                for (Room room : rooms) {
+                    System.out.println(room);
+                }
+                break;
+            case 2:
+                Set<Reservation> reservations = reservationDao.getAllForCustomer(custId);
+                if (reservations == null || reservations.size() == 0) {
+                    System.out.println("No reservations found for given customer");
+                } else {
+                    for (Reservation reservation : reservations) {
+                        System.out.println(reservation);
+                    }
+                }
+                break;
         }
     }
 }
