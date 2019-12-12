@@ -54,7 +54,7 @@ public class Main {
     }
 
     private static void print_options() {
-        System.out.println("1. Make a reservation\n2. Cancel a booking\n3. Get Room or Reservation information\n4. Logout\n5. Quit");
+        System.out.println("1. Make a reservation\n2. Cancel a booking\n3. Change a booking\n4. Get Room or Reservation information\n5. Logout\n6. Quit");
     }
 
     private static void main_loop(CreditCardDaoImpl creditCardDao, CustomerDaoImpl customerDao,
@@ -80,14 +80,18 @@ public class Main {
                     cancelRoom(sc, reservationDao, custId);
                     counter = 0;
                     continue;
-                case 3: // call get room info submenu
+                case 3:
+                    changeReservation(sc, reservationDao, roomDao, custId);
+                    counter = 0;
+                    continue;
+                case 4: // call get room info submenu
                     getRoomInformations(sc, roomDao, reservationDao, custId);
                     counter = 0;
                     continue;
-                case 4:
+                case 5:
                     custId = login(sc, customerDao);
                     continue;
-                case 5:
+                case 6:
                     System.out.println("Exiting...");
                     return;
                 default:
@@ -223,6 +227,50 @@ public class Main {
         reservationDao.delete(cancelled);
 
         System.out.println("Your reservation has been cancelled, credit card " + cancelled.getCardNum() + " has been refunded");
+    }
+
+    private static void changeReservation(Scanner sc, ReservationDaoImpl reservationDao, RoomDaoImpl roomDao, int custId) {
+        Set<Reservation> reservations = reservationDao.getAllForCustomer(custId);
+        if (reservations == null || reservations.size() == 0) {
+            System.out.println("No reservations found for given customer");
+            return;
+        }
+
+        Map<Integer, Reservation> reservationMap = new HashMap<>();
+        System.out.println("Found reservations:");
+        for (Reservation reservation : reservations) {
+            System.out.println(reservation);
+            reservationMap.put(reservation.getrID(), reservation);
+        }
+
+        System.out.println("Enter ID of desired change of reservation");
+        Reservation reservation = reservationMap.get(Integer.parseInt(sc.nextLine()));
+
+        System.out.println("Current Details:\nCheck In: " + reservation.getCheckIn() + "\nCheck Out: " + reservation.getCheckOut() +
+                "\nNumber of Occupants: " + reservation.getNumOcc() + "\n");
+
+        String maxCheckInExt = reservationDao.getMaxCheckInChangeDate(reservation.getCheckIn(), reservation.getRoomCode());
+        System.out.println("Max check in extension: " + maxCheckInExt);
+
+        String maxCheckOutExt = reservationDao.getMaxCheckOutChangeDate(reservation.getCheckOut(), reservation.getRoomCode());
+        System.out.println("Max check in extension: " + maxCheckOutExt);
+
+        System.out.println("\nEnter new check in date:");
+        String checkIn = sc.nextLine();
+
+        System.out.println("\nEnter new check out date:");
+        String checkOut = sc.nextLine();
+
+        Room room = roomDao.getByCode(reservation.getRoomCode());
+        System.out.println("\nEnter new occupant count [NOTE: OCCUPANCY MAY NOT EXCEED " + room.getMaxOccupancy() + "!!]:");
+        int numOcc = Integer.parseInt(sc.nextLine());
+
+        reservation.setCheckIn(checkIn);
+        reservation.setCheckOut(checkOut);
+        reservation.setNumOcc(numOcc);
+
+        reservationDao.update(reservation);
+        System.out.println("Reservation successfully updated\n" + reservation);
     }
 
     private static void getRoomInformations(Scanner sc, RoomDaoImpl roomDao, ReservationDaoImpl reservationDao, int custId) {

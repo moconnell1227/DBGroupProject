@@ -67,6 +67,18 @@ public class Reservation {
         return checkOut;
     }
 
+    public void setNumOcc(Integer numOcc) {
+        this.numOcc = numOcc;
+    }
+
+    public void setCheckIn(String checkIn) {
+        this.checkIn = checkIn;
+    }
+
+    public void setCheckOut(String checkOut) {
+        this.checkOut = checkOut;
+    }
+
     @Override
     public String toString() {
         return "rID: " + rID + ", checkIn: " + checkIn +

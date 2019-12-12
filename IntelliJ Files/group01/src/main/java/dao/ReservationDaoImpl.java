@@ -60,7 +60,7 @@ public class ReservationDaoImpl implements Dao<Reservation> {
     }
 
     public Map<String, int[]> createRoomRevenues(Set<MonthlyRevenue> revenues) {
-        Map<String, int[]> roomRevenues = new HashMap<String, int[]>();
+        Map<String, int[]> roomRevenues = new HashMap<>();
 
         for (MonthlyRevenue r : revenues) {
             if (roomRevenues.containsKey(r.getRoom())) {
@@ -79,6 +79,68 @@ public class ReservationDaoImpl implements Dao<Reservation> {
             total += r.getRevenue();
         }
         return total;
+    }
+
+    public String getMaxCheckInChangeDate(String checkIn, String roomCode) {
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        String max = null;
+        try {
+            preparedStatement = this.conn.prepareStatement("select MAX(CheckOut) as mx from Reservations where RoomCode = ? and CheckIn < ?");
+            preparedStatement.setString(1, roomCode);
+            preparedStatement.setString(2, checkIn);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                max = resultSet.getString("mx");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (resultSet != null)
+                    resultSet.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                if (preparedStatement != null)
+                    preparedStatement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return max;
+    }
+
+    public String getMaxCheckOutChangeDate(String checkOut, String roomCode) {
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        String max = null;
+        try {
+            preparedStatement = this.conn.prepareStatement("select MIN(CheckIn) as mn from Reservations where RoomCode = ? and CheckIn >= ?");
+            preparedStatement.setString(1, roomCode);
+            preparedStatement.setString(2, checkOut);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                max = resultSet.getString("mn");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (resultSet != null)
+                    resultSet.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                if (preparedStatement != null)
+                    preparedStatement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return max;
     }
 
     public Set<MonthlyRevenue> getRevenue() {
@@ -197,16 +259,16 @@ public class ReservationDaoImpl implements Dao<Reservation> {
     public Boolean update(Reservation obj) {
         try {
             PreparedStatement preparedStatement = this.conn.prepareStatement(
-                    "UPDATE Reservation SET CheckIn=?, CheckOut=?, Rate=?, NumOcc=?, " +
+                    "UPDATE Reservations SET CheckIn=?, CheckOut=?, Rate=?, NumOcc=?, " +
                             "RoomCode=?, CustomerId=?, CardNum=? WHERE rID=?");
             preparedStatement.setString(1, obj.getCheckIn());
             preparedStatement.setString(2, obj.getCheckOut());
             preparedStatement.setFloat(3, obj.getRate());
             preparedStatement.setInt(4, obj.getNumOcc());
             preparedStatement.setString(5, obj.getRoomCode());
-            preparedStatement.setInt(5, obj.getCustomerId());
-            preparedStatement.setInt(5, obj.getCardNum());
-            preparedStatement.setInt(5, obj.getrID());
+            preparedStatement.setInt(6, obj.getCustomerId());
+            preparedStatement.setInt(7, obj.getCardNum());
+            preparedStatement.setInt(8, obj.getrID());
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
