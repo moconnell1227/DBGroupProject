@@ -20,7 +20,7 @@ public class CreditCardDaoImpl implements Dao<CreditCard> {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         try {
-            preparedStatement = this.conn.prepareStatement("SELECT * FROM CreditCard WHERE CardNum = ?");
+            preparedStatement = this.conn.prepareStatement("SELECT * FROM CreditCards WHERE CardNum = ?");
             preparedStatement.setInt(1, id);
             resultSet = preparedStatement.executeQuery();
             Set<CreditCard> creditCards = unpackResultSet(resultSet);
@@ -29,6 +29,24 @@ public class CreditCardDaoImpl implements Dao<CreditCard> {
             e.printStackTrace();
         }
         return creditCard;
+    }
+
+    public Set<CreditCard> getAllForCustomer(int cid) {
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = this.conn.prepareStatement("SELECT * FROM CreditCards WHERE OwnerID = ?");
+            preparedStatement.setInt(1, cid);
+            resultSet = preparedStatement.executeQuery();
+            Set<CreditCard> creditCards = unpackResultSet(resultSet);
+            if (creditCards.size() == 0) {
+                return null;
+            }
+            return creditCards;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
@@ -51,9 +69,9 @@ public class CreditCardDaoImpl implements Dao<CreditCard> {
         PreparedStatement preparedStatement = null;
         try {
             preparedStatement = this.conn.prepareStatement(
-                    "INSERT INTO CreditCards (Balance, CardLimit, OwnerID) VALUES (?, ?, ?, ?)");
-            preparedStatement.setFloat(1, obj.getCardLimit());
-            preparedStatement.setFloat(2, obj.getBalance());
+                    "INSERT INTO CreditCards (Balance, CardLimit, OwnerID) VALUES (?, ?, ?)");
+            preparedStatement.setFloat(1, obj.getBalance());
+            preparedStatement.setFloat(2, obj.getCardLimit());
             preparedStatement.setInt(3, obj.getOwnerId());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {

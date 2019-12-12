@@ -3,10 +3,7 @@ package dao;
 import entity.MonthlyRevenue;
 import entity.Reservation;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Map;
@@ -56,7 +53,7 @@ public class ReservationDaoImpl implements Dao<Reservation> {
         for (Map.Entry<String, int[]> room : roomRevenues.entrySet()) {
             System.out.print("Room: " + room.getKey());
             for (int i = 1; i < 12; i++) {
-                System.out.print(", Month: " + i + ", Revenue: " + room.getValue()[i-1]);
+                System.out.print(", Month: " + i + ", Revenue: " + room.getValue()[i - 1]);
             }
             System.out.println(", Total Revenue: " + totalRev);
         }
@@ -67,10 +64,10 @@ public class ReservationDaoImpl implements Dao<Reservation> {
 
         for (MonthlyRevenue r : revenues) {
             if (roomRevenues.containsKey(r.getRoom())) {
-                roomRevenues.get(r.getRoom())[r.getMonth()-1] = r.getRevenue();
+                roomRevenues.get(r.getRoom())[r.getMonth() - 1] = r.getRevenue();
             } else {
                 roomRevenues.put(r.getRoom(), new int[12]);
-                roomRevenues.get(r.getRoom())[r.getMonth()-1] = r.getRevenue();
+                roomRevenues.get(r.getRoom())[r.getMonth() - 1] = r.getRevenue();
             }
         }
         return roomRevenues;
@@ -90,11 +87,11 @@ public class ReservationDaoImpl implements Dao<Reservation> {
         Set<MonthlyRevenue> revenues = null;
         try {
             preparedStatement = this.conn.prepareStatement("SELECT RoomCode, month(CheckIn) as month, " +
-                  "count(RoomCode) as c, " +
-                  "round(sum(datediff(checkout, checkin)*rate), 2) as r " +
-                  "from Reservations " +
-                  "group by RoomCode, month " +
-                  "order by RoomCode, month");
+                    "count(RoomCode) as c, " +
+                    "round(sum(datediff(checkout, checkin)*rate), 2) as r " +
+                    "from Reservations " +
+                    "group by RoomCode, month " +
+                    "order by RoomCode, month");
             resultSet = preparedStatement.executeQuery();
             revenues = unpackResultSetRevenue(resultSet);
         } catch (SQLException e) {
@@ -149,8 +146,7 @@ public class ReservationDaoImpl implements Dao<Reservation> {
     public Boolean insert(Reservation obj) {
         try {
             PreparedStatement preparedStatement = this.conn.prepareStatement(
-                    "INSERT INTO Reservations (CheckIn, CheckOut, Rate, " +
-                            "NumOcc, RoomCode, CustomerId, CardNum) VALUES (?,?,?,?,?,?,?)"
+                    "INSERT INTO Reservations (CheckIn, CheckOut, Rate, NumOcc, RoomCode, CustomerId, CardNum) VALUES (?,?,?,?,?,?,?)"
             );
             preparedStatement.setString(1, obj.getCheckIn());
             preparedStatement.setString(2, obj.getCheckOut());
@@ -159,10 +155,9 @@ public class ReservationDaoImpl implements Dao<Reservation> {
             preparedStatement.setString(5, obj.getRoomCode());
             preparedStatement.setInt(6, obj.getCustomerId());
             preparedStatement.setInt(7, obj.getCardNum());
-            preparedStatement.execute();
+            preparedStatement.executeUpdate();
             return true;
         } catch (SQLException e) {
-            e.printStackTrace();
             return false;
         }
     }
@@ -180,7 +175,7 @@ public class ReservationDaoImpl implements Dao<Reservation> {
             preparedStatement.setString(5, obj.getRoomCode());
             preparedStatement.setInt(5, obj.getCustomerId());
             preparedStatement.setInt(5, obj.getCardNum());
-            preparedStatement.setInt(5, obj.getRID());
+            preparedStatement.setInt(5, obj.getrID());
             preparedStatement.execute();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -195,7 +190,7 @@ public class ReservationDaoImpl implements Dao<Reservation> {
             PreparedStatement preparedStatement = this.conn.prepareStatement(
                     "DELETE FROM Reservations WHERE rID=?"
             );
-            preparedStatement.setInt(1, obj.getRID());
+            preparedStatement.setInt(1, obj.getrID());
             preparedStatement.execute();
             return true;
         } catch (SQLException e) {
