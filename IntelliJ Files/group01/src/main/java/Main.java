@@ -76,11 +76,11 @@ public class Main {
                     counter = 0;
                     continue;
                 case 2: // call cancel reservation submenu
-                    System.out.println("You're trying to cancel a reservation!");
+                    cancelRoom(sc, reservationDao, custId);
                     counter = 0;
                     continue;
                 case 3: // call get room info submenu
-                    System.out.println("You're trying to get some room info!");
+                    getRoomInformations(roomDao);
                     counter = 0;
                     continue;
                 case 4:
@@ -158,7 +158,21 @@ public class Main {
         System.out.println("Enter desired occupants");
         int occupants = Integer.parseInt(sc.nextLine());
 
-        Set<Room> availableRooms = roomDao.getAvailableRooms(checkin, checkout, occupants);
+        System.out.println("Enter the type of room [King, Queen, Double]");
+        String type = sc.nextLine();
+
+        System.out.println("Enter the type of decor [modern, traditional, rustic]");
+        String decor = sc.nextLine();
+
+        System.out.println("Enter the maximum price per day of the room");
+        int maxPrice = Integer.parseInt(sc.nextLine());
+
+        Set<Room> availableRooms = roomDao.getAvailableRooms(checkin, checkout, occupants, type, decor, maxPrice);
+        if (availableRooms == null || availableRooms.size() == 0) {
+            System.out.println("Sorry, no rooms are available with those specifications!\n");
+            return;
+        }
+
         System.out.println("\nAvailable Rooms:");
         Map<String, Room> roomMap = new HashMap<>();
         for (Room room : availableRooms) {
@@ -176,14 +190,50 @@ public class Main {
         Reservation reservation = new Reservation(checkin, checkout,
                 (float) room.getBasePrice(), occupants, room.getCode(), custId, creditCard.getCardNum());
 
-        System.out.println(reservation);
-
         boolean success = reservationDao.insert(reservation);
         if (success) {
-            System.out.println("Congrats! You made a reservation\n" + reservation);
+            System.out.println("Congrats! You made a reservation\n" + reservation + "\n");
         } else {
-            System.out.println("Sorry! Your card was declined :(((");
+            System.out.println("Sorry! Your card was declined :(((\n");
+        }
+    }
+
+    private static void cancelRoom(Scanner sc, ReservationDaoImpl reservationDao, int custId) {
+        System.out.println("You're trying to cancel a reservation!");
+        Set<Reservation> reservations = reservationDao.getAllForCustomer(custId);
+        Map<Integer, Reservation> reservationMap = new HashMap<>();
+
+        if (reservations == null) {
+            System.out.println("No reservations were found with this customer ID");
+            return;
         }
 
+        System.out.println("Found reservations:");
+        for (Reservation reservation : reservations) {
+            System.out.println(reservation);
+            reservationMap.put(reservation.getrID(), reservation);
+        }
+
+        System.out.println("\nEnter id to cancel");
+        Reservation cancelled = reservationMap.get(Integer.parseInt(sc.nextLine()));
+        reservationDao.delete(cancelled);
+
+        System.out.println("Your reservation has been cancelled, credit card " + cancelled.getCardNum() + " has been refunded\n");
+    }
+
+    private static void getRoomInformations(RoomDaoImpl roomDao) {
+        System.out.println("You're trying to get some room info!");
+
+        Set<Room> rooms = roomDao.getAll();
+        if (rooms == null || rooms.size() == 0) {
+            System.out.println("Sorry no rooms were found.\n");
+            return;
+        }
+
+        System.out.println("Rooms in the hotel:");
+        for (Room room : rooms) {
+            System.out.println(room);
+        }
     }
 }
+

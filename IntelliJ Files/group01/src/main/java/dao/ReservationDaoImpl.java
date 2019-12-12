@@ -113,6 +113,37 @@ public class ReservationDaoImpl implements Dao<Reservation> {
         return revenues;
     }
 
+    public Set<Reservation> getAllForCustomer(int custId) {
+        Set<Reservation> reservations = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = this.conn.prepareStatement("SELECT * FROM Reservations WHERE CustomerID = ?");
+            preparedStatement.setInt(1, custId);
+            resultSet = preparedStatement.executeQuery();
+            reservations = unpackResultSet(resultSet);
+            if (reservations.size() == 0) {
+                return null;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (resultSet != null)
+                    resultSet.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                if (preparedStatement != null)
+                    preparedStatement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return reservations;
+    }
+
 
     @Override
     public Set<Reservation> getAll() {

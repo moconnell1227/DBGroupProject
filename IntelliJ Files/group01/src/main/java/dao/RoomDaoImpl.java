@@ -134,13 +134,13 @@ public class RoomDaoImpl implements Dao<Room> {
         String today = "2010-09-05";
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-        try{
+        try {
             preparedStatement = this.conn.prepareStatement("SELECT round((SUM(DATEDIFF(CheckOut, CheckIn)))/180, 2) AS popScore FROM Reservations LEFT JOIN Rooms ON Reservations.RoomCode = Rooms.CODE WHERE CheckIn >= DATE(? - INTERVAL 180 DAY) AND CheckOut <= ? AND Rooms.CODE = ?");
             preparedStatement.setString(1, today);
             preparedStatement.setString(2, today);
             preparedStatement.setString(3, code);
             resultSet = preparedStatement.executeQuery();
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 popScore = popScore.add(resultSet.getBigDecimal("popScore"));
             }
             preparedStatement = this.conn.prepareStatement("SELECT round(DATEDIFF(?, CheckIn)/180, 2) AS popScore FROM Reservations LEFT JOIN Rooms ON Reservations.RoomCode = Rooms.CODE WHERE CheckIn < ? AND CheckOut > ? AND Rooms.CODE = ?");
@@ -149,7 +149,7 @@ public class RoomDaoImpl implements Dao<Room> {
             preparedStatement.setString(3, today);
             preparedStatement.setString(4, code);
             resultSet = preparedStatement.executeQuery();
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 popScore = popScore.add(resultSet.getBigDecimal("popScore"));
             }
             preparedStatement = this.conn.prepareStatement("SELECT round(DATEDIFF(CheckOut, DATE(? - INTERVAL 180 DAY))/180, 2) AS popScore FROM Reservations LEFT JOIN Rooms ON Reservations.RoomCode = Rooms.CODE WHERE CheckOut > DATE(? - INTERVAL 180 DAY) AND CheckIn < DATE(? - INTERVAL 180 DAY) AND Rooms.CODE = ?");
@@ -158,16 +158,16 @@ public class RoomDaoImpl implements Dao<Room> {
             preparedStatement.setString(3, today);
             preparedStatement.setString(4, code);
             resultSet = preparedStatement.executeQuery();
-            while(resultSet.next()) {
+            while (resultSet.next()) {
                 popScore = popScore.add(resultSet.getBigDecimal("popScore"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            try{
+            try {
                 if (resultSet != null)
                     resultSet.close();
-            } catch(SQLException e){
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
             try {
@@ -210,20 +210,26 @@ public class RoomDaoImpl implements Dao<Room> {
         return rooms;
     }
 
-    public Set<Room> getAvailableRooms(String checkin, String checkout, int minOcc) {
+    public Set<Room> getAvailableRooms(String checkin, String checkout, int minOcc, String type, String decor, int maxPrice) {
         Set<Room> availableRooms = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         try {
             preparedStatement = this.conn.prepareStatement("select * from Rooms where CODE not in (" +
-                    "select distinct CODE from Reservations join (" +
-                    "select distinct CODE from Rooms" +
-                    ") codes on RoomCode=CODE " +
-                    "where CheckIn >= ? and CheckOut <= ?" +
-                    ") and MaxOcc >= ?");
+                    "select RoomCode from Reservations where (CheckIn <= ? and CheckOut > ?)" +
+                    " or (CheckIn between ? and ?) or (CheckOut between ? and ?))" +
+                    " and MaxOcc >= ? and BedType = ? and Decor = ? and BasePrice <= ?");
             preparedStatement.setDate(1, Date.valueOf(checkin));
             preparedStatement.setDate(2, Date.valueOf(checkout));
-            preparedStatement.setInt(3, minOcc);
+            preparedStatement.setDate(3, Date.valueOf(checkin));
+            preparedStatement.setDate(4, Date.valueOf(checkout));
+            preparedStatement.setDate(5, Date.valueOf(checkin));
+            preparedStatement.setDate(6, Date.valueOf(checkout));
+            preparedStatement.setInt(7, minOcc);
+            preparedStatement.setString(8, type);
+            preparedStatement.setString(9, decor);
+            preparedStatement.setInt(10, maxPrice);
+
             resultSet = preparedStatement.executeQuery();
             availableRooms = unpackResultSet(resultSet);
         } catch (SQLException e) {
