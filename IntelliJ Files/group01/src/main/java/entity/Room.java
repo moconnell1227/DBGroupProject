@@ -94,7 +94,10 @@ public class Room {
 
     @Override
     public String toString() {
-        return "CODE: " + this.code + " Name: " + this.roomName + " Num_Beds: " + this.beds + " BedType: " + this.bedType +
-                " MaxOcc: " + this.maxOccupancy + " BasePrice: " + this.basePrice + " Decor: " + this.decor + " PopScore: " + this.popScore;
+        String roomFormat = "%7.2f\t%7s\t\t%-30s %-10s %-1d\t\t%-1d\t\t%-1.2f\t\t%-1s";
+        return String.format(roomFormat, this.popScore, this.code, this.roomName, this.bedType, this.beds, this.maxOccupancy, (float)this.basePrice, this.decor);
+
     }
+
+
 }

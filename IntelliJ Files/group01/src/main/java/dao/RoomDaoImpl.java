@@ -250,6 +250,41 @@ public class RoomDaoImpl implements Dao<Room> {
         }
         return availableRooms;
     }
+    public Set<Room> getAvailableRooms(String checkin, String checkout) {
+        Set<Room> availableRooms = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            preparedStatement = this.conn.prepareStatement("select * from Rooms where CODE not in (" +
+                    "select RoomCode from Reservations where (CheckIn <= ? and CheckOut > ?)" +
+                    " or (CheckIn between ? and ?) or (CheckOut between ? and ?))");
+            preparedStatement.setDate(1, Date.valueOf(checkin));
+            preparedStatement.setDate(2, Date.valueOf(checkout));
+            preparedStatement.setDate(3, Date.valueOf(checkin));
+            preparedStatement.setDate(4, Date.valueOf(checkout));
+            preparedStatement.setDate(5, Date.valueOf(checkin));
+            preparedStatement.setDate(6, Date.valueOf(checkout));
+
+            resultSet = preparedStatement.executeQuery();
+            availableRooms = unpackResultSet(resultSet);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (resultSet != null)
+                    resultSet.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                if (preparedStatement != null)
+                    preparedStatement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return availableRooms;
+    }
 
 
     private Set<Room> unpackResultSet(ResultSet rs) throws SQLException {

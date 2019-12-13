@@ -8,6 +8,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class Main {
@@ -53,8 +54,13 @@ public class Main {
         }
     }
 
-    private static void print_options() {
-        System.out.println("1. Make a reservation\n2. Cancel a booking\n3. Change a booking\n4. Get Room or Reservation information\n5. Logout\n6. Quit");
+    private static void print_options(boolean isManager) {
+        if (isManager) {
+            System.out.println("Welcome, manager!");
+            System.out.println("1. Make a reservation\n2. Cancel a booking\n3. Change a booking\n4. Get Room or Reservation information\n5. Logout\n6. Quit");
+        } else {
+            System.out.println("1. Make a reservation\n2. Cancel a booking\n3. Change a booking\n4. Get Room or Reservation information\n5. Logout\n6. Quit");
+        }
     }
 
     private static void main_loop(CreditCardDaoImpl creditCardDao, CustomerDaoImpl customerDao,
@@ -63,13 +69,14 @@ public class Main {
         boolean run = true;
         int command;
         int counter = 0;
+        int managerID = 900;
 
         int custId = login(sc, customerDao);
         System.out.println("\nThanks for logging in!");
         System.out.println("Welcome to the 365-Reservation System! Please choose an option:");
         while (run) {
             System.out.println("\nOptions:");
-            print_options();
+            print_options((custId==managerID));
             command = Integer.parseInt(sc.nextLine());
             switch (command) {
                 case 1: // call make reservation submenu
@@ -80,7 +87,7 @@ public class Main {
                     cancelRoom(sc, reservationDao, custId);
                     counter = 0;
                     continue;
-                case 3:
+                case 3: // change a reservation submenu
                     changeReservation(sc, reservationDao, roomDao, custId);
                     counter = 0;
                     continue;
@@ -88,10 +95,10 @@ public class Main {
                     getRoomInformations(sc, roomDao, reservationDao, custId);
                     counter = 0;
                     continue;
-                case 5:
+                case 5: // logout
                     custId = login(sc, customerDao);
                     continue;
-                case 6:
+                case 6: // quit
                     System.out.println("Exiting...");
                     return;
                 default:
@@ -274,6 +281,24 @@ public class Main {
         System.out.println("Reservation successfully updated\n" + reservation);
     }
 
+    private static Set<Room> getSetDifference(Set<Room> allRooms, Set<Room> availableRooms) {
+        Set<Room> setDiff = null;
+
+        for (Room room : allRooms) {
+            String code = room.getCode();
+            boolean free = false;
+            for (Room freeRoom : availableRooms) {
+                if (code.equals(freeRoom.getCode())) {
+                    free=true;
+                }
+            }
+            if (!free) {
+                setDiff.add(room);
+            }
+        }
+        return setDiff;
+    }
+
     private static void getRoomInformations(Scanner sc, RoomDaoImpl roomDao, ReservationDaoImpl reservationDao, int custId) {
         System.out.println("You're trying to get some room info!\nOptions:");
 
@@ -282,17 +307,42 @@ public class Main {
 
         switch (choice) {
             case 1:
-                Set<Room> rooms = roomDao.getAll();
-                if (rooms == null || rooms.size() == 0) {
+                String formatString = "yyyy-MM-dd";
+                SimpleDateFormat dateFormat = new SimpleDateFormat(formatString);
+                Date current_date = new Date();
+                Calendar c = Calendar.getInstance();
+                c.setTime(current_date);
+                c.add(Calendar.DATE, 1);
+                Date next_date = c.getTime();
+                Set<Room> allRooms = roomDao.getAll();
+                if (allRooms == null || allRooms.size() == 0) {
                     System.out.println("Sorry no rooms were found.\n");
                     return;
                 }
 
-                System.out.println("Rooms in the hotel:");
-                for (Room room : rooms) {
-                    System.out.println(room);
+                Set<Room> available = roomDao.getAvailableRooms(dateFormat.format(current_date), dateFormat.format(next_date));
+                Set<Room> unavailable = getSetDifference(allRooms, available);
+
+                if (available.size() > 0) {
+                    System.out.println("Available Rooms:");
+                    String title = "Popularity\tCODE\t\tName\t\t\t\t\tBed Type\tBeds\tMaxOcc\tBase Price\tDecor\n";
+                    System.out.print(title);
+                    for (Room room : available) {
+                        System.out.println(room);
+                    }
                 }
+
+                if (unavailable != null && unavailable.size() > 0) {
+                    System.out.println("Unavailable Rooms:");
+                    String title = "Popularity\tCODE\t\tName\t\t\t\t\tBed Type\tBeds\tMaxOcc\tBase Price\tDecor\t\tNext Available Date\n";
+                    System.out.print(title);
+                    for (Room room : unavailable) {
+                        System.out.println(room);
+                    }
+                }
+
                 break;
+
             case 2:
                 Set<Reservation> reservations = reservationDao.getAllForCustomer(custId);
                 if (reservations == null || reservations.size() == 0) {
