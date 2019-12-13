@@ -1,8 +1,5 @@
 import dao.*;
-import entity.CreditCard;
-import entity.Customer;
-import entity.Reservation;
-import entity.Room;
+import entity.*;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -57,7 +54,7 @@ public class Main {
     private static void print_options(boolean isManager) {
         if (isManager) {
             System.out.println("Welcome, manager!");
-            System.out.println("1. Make a reservation\n2. Cancel a booking\n3. Change a booking\n4. Get Room or Reservation information\n5. Logout\n6. Quit");
+            System.out.println("1. Make a reservation\n2. Cancel a booking\n3. Change a booking\n4. Get Room or Reservation information\n5. Logout\n6. Get Monthly Revenues\n7. Quit");
         } else {
             System.out.println("1. Make a reservation\n2. Cancel a booking\n3. Change a booking\n4. Get Room or Reservation information\n5. Logout\n6. Quit");
         }
@@ -68,7 +65,6 @@ public class Main {
         Scanner sc = new Scanner(System.in);
         boolean run = true;
         int command;
-        int counter = 0;
         int managerID = 900;
 
         int custId = login(sc, customerDao);
@@ -81,42 +77,50 @@ public class Main {
             switch (command) {
                 case 1: // call make reservation submenu
                     reserveRoom(sc, roomDao, reservationDao, creditCardDao, custId);
-                    counter = 0;
                     continue;
                 case 2: // call cancel reservation submenu
                     cancelRoom(sc, reservationDao, custId);
-                    counter = 0;
                     continue;
                 case 3: // change a reservation submenu
                     changeReservation(sc, reservationDao, roomDao, custId);
-                    counter = 0;
                     continue;
                 case 4: // call get room info submenu
                     getRoomInformations(sc, roomDao, reservationDao, custId);
-                    counter = 0;
                     continue;
                 case 5: // logout
                     custId = login(sc, customerDao);
                     continue;
-                case 6: // quit
+                case 6: // quit or monthly revenue if manager
+                    if (custId == managerID) {
+                        System.out.println("Fetching monthly revenue...");
+                        getMonthlyRevenue(reservationDao);
+                    } else {
+                        System.out.println("Exiting...");
+                        run = false;
+                    }
+                    continue;
+                case 7: // Quit always
                     System.out.println("Exiting...");
-                    return;
+                    run=false;
+                    continue;
                 default:
                     System.out.print("Unsupported command. Exiting...");
                     run = false;
+                    continue;
             }
-            if (++counter > 100) {
-                run = false;
-            }
-
         }
-
     }
 
     private static int login(Scanner sc, CustomerDaoImpl customerDao) {
         System.out.println("Enter customer id for login (999 if new)");
         int id = Integer.parseInt(sc.nextLine());
-        Customer cus = customerDao.getById(id);
+        Customer cus = null;
+        if (id == 900) {
+            System.out.println("Logging in as Manager.");
+            return id;
+        } else {
+            cus = customerDao.getById(id);
+        }
         if (cus == null) {
             System.out.println("This customer does not exist, please provide a first and last name to create a new account");
 
@@ -283,20 +287,24 @@ public class Main {
 
     private static Set<Room> getSetDifference(Set<Room> allRooms, Set<Room> availableRooms) {
         Set<Room> setDiff = null;
-
-        for (Room room : allRooms) {
-            String code = room.getCode();
-            boolean free = false;
-            for (Room freeRoom : availableRooms) {
-                if (code.equals(freeRoom.getCode())) {
-                    free=true;
+        if (availableRooms == null || availableRooms.size() <= 0 || allRooms == null || allRooms.size() <= 0) {
+            System.out.println("Sorry, there are no available rooms.");
+            return null;
+        } else {
+            for (Room room : allRooms) {
+                String code = room.getCode();
+                boolean free = false;
+                for (Room freeRoom : availableRooms) {
+                    if (code.equals(freeRoom.getCode())) {
+                        free = true;
+                    }
+                }
+                if (!free) {
+                    setDiff.add(room);
                 }
             }
-            if (!free) {
-                setDiff.add(room);
-            }
+            return setDiff;
         }
-        return setDiff;
     }
 
     private static void getRoomInformations(Scanner sc, RoomDaoImpl roomDao, ReservationDaoImpl reservationDao, int custId) {
@@ -353,6 +361,43 @@ public class Main {
                     }
                 }
                 break;
+        }
+    }
+
+    private static void displayRevenues(String roomCode, List<MonthlyRevenue> revenues) {
+        int total = 0;
+        HashMap<Integer, Integer> monthsMap = new HashMap<Integer, Integer>();
+        HashMap<Integer, Integer> sorted = new HashMap<Integer, Integer>();
+        for (MonthlyRevenue rev : revenues) {
+            monthsMap.put(rev.getMonth(), rev.getRevenue());
+        }
+        sorted.putAll(monthsMap);
+        String resultString = "";
+        for (Integer month : sorted.keySet()) {
+            total += sorted.get(month);
+            resultString = resultString.concat(String.format("\t%-5s", sorted.get(month).toString()));
+        }
+        System.out.println(roomCode + ": " + resultString + String.format("\t%-5d", total));
+    }
+
+    private static void getMonthlyRevenue(ReservationDaoImpl reservationDao) {
+        Set<MonthlyRevenue> revenues = reservationDao.getRevenue();
+        HashMap<String, List<MonthlyRevenue>> revMap = new HashMap<String, List<MonthlyRevenue>>();
+        for (MonthlyRevenue month : revenues) {
+            String room = month.getRoom();
+            if (!revMap.containsKey(room)) {
+                List<MonthlyRevenue> list = new ArrayList<MonthlyRevenue>();
+                list.add(month);
+
+                revMap.put(room, list);
+            } else {
+                revMap.get(room).add(month);
+            }
+        }
+        System.out.println("Room\tJAN\t\tFEB\t\tMAR\t\tAPR\t\tMAY\t\tJUN\t\tJUL\t\tAUG\t\tSEP\t\tOCT\t\tNOV\t\tDEC\t\tTOTAL");
+        for (String room : revMap.keySet()) {
+            List<MonthlyRevenue> revs = revMap.get(room);
+            displayRevenues(room, revs);
         }
     }
 }
