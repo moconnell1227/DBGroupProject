@@ -206,6 +206,37 @@ public class ReservationDaoImpl implements Dao<Reservation> {
         return reservations;
     }
 
+    public String getCheckOutDateForCode(String code, String checkIn) {
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        String checkOut = null;
+        try {
+            preparedStatement = this.conn.prepareStatement("SELECT CheckOut FROM Reservations WHERE RoomCode = ? AND CheckOut > ?");
+            preparedStatement.setString(1, code);
+            preparedStatement.setString(2, checkIn);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                checkOut = resultSet.getString("CheckOut");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (resultSet != null)
+                    resultSet.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                if (preparedStatement != null)
+                    preparedStatement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return checkOut;
+    }
+
 
     @Override
     public Set<Reservation> getAll() {
@@ -271,7 +302,6 @@ public class ReservationDaoImpl implements Dao<Reservation> {
             preparedStatement.setInt(8, obj.getrID());
             preparedStatement.execute();
         } catch (SQLException e) {
-            e.printStackTrace();
             return false;
         }
         return true;

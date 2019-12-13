@@ -107,6 +107,35 @@ BEGIN
 END$
 DELIMITER ;
 
+-- trigger to check to ensure the credit card balance does not exceed limit
+-- on update for booking reservation
+
+DELIMITER $
+CREATE TRIGGER credit_cards_before_update_balance_check BEFORE
+UPDATE ON Reservations
+FOR EACH ROW
+BEGIN
+    IF NOT EXISTS
+        (SELECT * FROM CreditCards
+        WHERE CreditCards.CardNum = NEW.CardNum)
+    THEN
+        SIGNAL SQLSTATE '99999'
+        SET MESSAGE_TEXT = 'This Credit Card Does Not Exist';
+    END IF;
+
+    set @bal = (select Balance from CreditCards where CardNum = NEW.CardNum) + (datediff(NEW.CheckOut, NEW.CheckIn)*NEW.Rate) - (datediff(OLD.CheckOut, OLD.CheckIn)*OLD.Rate);
+    set @lim = (select CardLimit from CreditCards where CardNum = NEW.CardNum);
+
+    IF (@bal > @lim)
+    then
+        signal sqlstate '99999'
+        set MESSAGE_TEXT = 'This Charge exceeds limit';
+    else
+        update CreditCards set balance=@bal where CardNum =NEW.CardNum;
+    end if;
+END$
+DELIMITER ;
+
 
 -- trigger to check if a refund will make a card balance less than 0
 DELIMITER $

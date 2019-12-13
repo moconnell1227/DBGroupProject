@@ -12,7 +12,7 @@ public class Main {
     public static void main(String args[]) {
         String credFile = "./src/main/java/credential.xml";
         Properties properties = new Properties();
-        FileInputStream fis = null;
+        FileInputStream fis;
 
         try {
             fis = new FileInputStream(credFile);
@@ -44,9 +44,7 @@ public class Main {
 
             main_loop(ccDao, custDao, resDao, roomDao);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
+        } catch (IOException | SQLException e) {
             e.printStackTrace();
         }
     }
@@ -72,7 +70,7 @@ public class Main {
         System.out.println("Welcome to the 365-Reservation System! Please choose an option:");
         while (run) {
             System.out.println("\nOptions:");
-            print_options((custId==managerID));
+            print_options((custId == managerID));
             command = Integer.parseInt(sc.nextLine());
             switch (command) {
                 case 1: // call make reservation submenu
@@ -101,12 +99,11 @@ public class Main {
                     continue;
                 case 7: // Quit always
                     System.out.println("Exiting...");
-                    run=false;
+                    run = false;
                     continue;
                 default:
                     System.out.print("Unsupported command. Exiting...");
                     run = false;
-                    continue;
             }
         }
     }
@@ -114,7 +111,7 @@ public class Main {
     private static int login(Scanner sc, CustomerDaoImpl customerDao) {
         System.out.println("Enter customer id for login (999 if new)");
         int id = Integer.parseInt(sc.nextLine());
-        Customer cus = null;
+        Customer cus;
         if (id == 900) {
             System.out.println("Logging in as Manager.");
             return id;
@@ -194,6 +191,7 @@ public class Main {
 
         System.out.println("\nAvailable Rooms:");
         Map<String, Room> roomMap = new HashMap<>();
+        System.out.println("Popularity\tCODE\t\tName\t\t\t\t\tBed Type\tBeds\tMaxOcc\tBase Price\tDecor");
         for (Room room : availableRooms) {
             System.out.println(room);
             roomMap.put(room.getCode(), room);
@@ -265,7 +263,10 @@ public class Main {
         System.out.println("Max check in extension: " + maxCheckInExt);
 
         String maxCheckOutExt = reservationDao.getMaxCheckOutChangeDate(reservation.getCheckOut(), reservation.getRoomCode());
-        System.out.println("Max check in extension: " + maxCheckOutExt);
+        if (maxCheckOutExt == null) {
+            maxCheckOutExt = "9999-12-31";
+        }
+        System.out.println("Max check out extension: " + maxCheckOutExt);
 
         System.out.println("\nEnter new check in date:");
         String checkIn = sc.nextLine();
@@ -281,12 +282,15 @@ public class Main {
         reservation.setCheckOut(checkOut);
         reservation.setNumOcc(numOcc);
 
-        reservationDao.update(reservation);
-        System.out.println("Reservation successfully updated\n" + reservation);
+        if (reservationDao.update(reservation)) {
+            System.out.println("Reservation successfully updated\n" + reservation);
+        } else {
+            System.out.println("Reservation was not updated because your card was declined.");
+        }
     }
 
     private static Set<Room> getSetDifference(Set<Room> allRooms, Set<Room> availableRooms) {
-        Set<Room> setDiff = null;
+        Set<Room> setDiff = new HashSet<>();
         if (availableRooms == null || availableRooms.size() <= 0 || allRooms == null || allRooms.size() <= 0) {
             System.out.println("Sorry, there are no available rooms.");
             return null;
@@ -345,7 +349,7 @@ public class Main {
                     String title = "Popularity\tCODE\t\tName\t\t\t\t\tBed Type\tBeds\tMaxOcc\tBase Price\tDecor\t\tNext Available Date\n";
                     System.out.print(title);
                     for (Room room : unavailable) {
-                        System.out.println(room);
+                        System.out.println(room + "\t" + reservationDao.getCheckOutDateForCode(room.getCode(), dateFormat.format(current_date)));
                     }
                 }
 
@@ -366,12 +370,11 @@ public class Main {
 
     private static void displayRevenues(String roomCode, List<MonthlyRevenue> revenues) {
         int total = 0;
-        HashMap<Integer, Integer> monthsMap = new HashMap<Integer, Integer>();
-        HashMap<Integer, Integer> sorted = new HashMap<Integer, Integer>();
+        HashMap<Integer, Integer> monthsMap = new HashMap<>();
         for (MonthlyRevenue rev : revenues) {
             monthsMap.put(rev.getMonth(), rev.getRevenue());
         }
-        sorted.putAll(monthsMap);
+        HashMap<Integer, Integer> sorted = new HashMap<>(monthsMap);
         String resultString = "";
         for (Integer month : sorted.keySet()) {
             total += sorted.get(month);
@@ -382,11 +385,11 @@ public class Main {
 
     private static void getMonthlyRevenue(ReservationDaoImpl reservationDao) {
         Set<MonthlyRevenue> revenues = reservationDao.getRevenue();
-        HashMap<String, List<MonthlyRevenue>> revMap = new HashMap<String, List<MonthlyRevenue>>();
+        HashMap<String, List<MonthlyRevenue>> revMap = new HashMap<>();
         for (MonthlyRevenue month : revenues) {
             String room = month.getRoom();
             if (!revMap.containsKey(room)) {
-                List<MonthlyRevenue> list = new ArrayList<MonthlyRevenue>();
+                List<MonthlyRevenue> list = new ArrayList<>();
                 list.add(month);
 
                 revMap.put(room, list);
