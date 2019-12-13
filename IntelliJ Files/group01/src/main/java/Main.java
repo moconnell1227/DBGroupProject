@@ -349,7 +349,8 @@ public class Main {
                     String title = "Popularity\tCODE\t\tName\t\t\t\t\tBed Type\tBeds\tMaxOcc\tBase Price\tDecor\t\tNext Available Date\n";
                     System.out.print(title);
                     for (Room room : unavailable) {
-                        System.out.println(room + "\t" + reservationDao.getCheckOutDateForCode(room.getCode(), dateFormat.format(current_date)));
+                        String nextAvailable = String.format("%15s", reservationDao.getCheckOutDateForCode(room.getCode(), dateFormat.format(current_date)));
+                        System.out.println(room + nextAvailable);
                     }
                 }
 

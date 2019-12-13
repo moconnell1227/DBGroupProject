@@ -40,20 +40,20 @@ with open(reservations_path) as csv_file_2:
         if in_cols == True:
             in_cols = False
         else:
-            ci_str1 = row[2].lower()
-            co_str1 = row[3].lower()
-            ci_str2 = ci_str1[1:3] + ci_str1[3:5].upper() + ci_str1[5:10]
-            co_str2 = co_str1[1:3] + co_str1[3:5].upper() + co_str1[5:10]
+            ci_str1 = row[9].lower() # modified this with new Reservations csv that has more recent dates
+            co_str1 = row[10].lower()
+            #ci_str2 = ci_str1[1:3] + ci_str1[3:5].upper() + ci_str1[5:10]
+            #co_str2 = co_str1[1:3] + co_str1[3:5].upper() + co_str1[5:10]
 
-            check_in = datetime.datetime.strptime(ci_str2, '%d-%b-%y')
-            check_out = datetime.datetime.strptime(co_str2, '%d-%b-%y')
+            #check_in = datetime.datetime.strptime(ci_str1, '%d-%b-%y')
+            #check_out = datetime.datetime.strptime(co_str1, '%d-%b-%y')
             cur_key = row[6].strip("\'") + row[5].strip("\'")
 
             sql += 'INSERT INTO Reservations (\n\t'
             sql += 'CheckIn, CheckOut, Rate, NumOcc, RoomCode, CustomerId, CardNum'
             sql += '\n\t) VALUES (\n\t\t'
-            sql += '\"' + check_in.strftime("%Y-%m-%d") + '\", '
-            sql += '\"' + check_out.strftime("%Y-%m-%d") + '\", '
+            sql += '\"' + ci_str1 + '\", '
+            sql += '\"' + co_str1 + '\", '
             sql += str(row[4]) + ', '
             sql += str(int(row[7]) + int(row[8])) + ', '
             sql += row[1] + ', '

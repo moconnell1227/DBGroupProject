@@ -1,9 +1,9 @@
 use group01;
 
-DROP TABLE IF EXISTS Rooms;
-DROP TABLE IF EXISTS Customers;
-DROP TABLE IF EXISTS CreditCards;
 DROP TABLE IF EXISTS Reservations;
+DROP TABLE IF EXISTS Rooms;
+DROP TABLE IF EXISTS CreditCards;
+DROP TABLE IF EXISTS Customers;
 
 CREATE TABLE IF NOT EXISTS Rooms (
 	CODE VARCHAR(3) NOT NULL PRIMARY KEY,
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS Rooms (
 	BedType ENUM('King', 'Queen', 'Double') NOT NULL,
 	MaxOcc INT NOT NULL,
 	BasePrice INT NOT NULL,
-	Decor ENUM('modern', 'traditional', 'rustic') NOT NULL 
+	Decor ENUM('modern', 'traditional', 'rustic') NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Customers (
@@ -42,4 +42,3 @@ CREATE TABLE IF NOT EXISTS Reservations (
 	FOREIGN KEY (CustomerID) REFERENCES Customers (cID),
 	FOREIGN KEY (CardNum) REFERENCES CreditCards (CardNum)
 );
-

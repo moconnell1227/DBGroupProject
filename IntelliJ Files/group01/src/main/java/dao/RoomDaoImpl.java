@@ -3,6 +3,10 @@ package dao;
 import entity.Room;
 
 import java.sql.*;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
 import java.math.BigDecimal;
@@ -131,31 +135,33 @@ public class RoomDaoImpl implements Dao<Room> {
 
     private BigDecimal getPopScore(String code) {
         BigDecimal popScore = new BigDecimal(0.00);
-        String today = "2010-09-05";
+
+        LocalDate current_date = LocalDate.now(ZoneId.of("America/Montreal"));
+
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         try {
             preparedStatement = this.conn.prepareStatement("SELECT round((SUM(DATEDIFF(CheckOut, CheckIn)))/180, 2) AS popScore FROM Reservations LEFT JOIN Rooms ON Reservations.RoomCode = Rooms.CODE WHERE CheckIn >= DATE(? - INTERVAL 180 DAY) AND CheckOut <= ? AND Rooms.CODE = ?");
-            preparedStatement.setString(1, today);
-            preparedStatement.setString(2, today);
+            preparedStatement.setDate(1, Date.valueOf(current_date));
+            preparedStatement.setDate(2, Date.valueOf(current_date));
             preparedStatement.setString(3, code);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 popScore = popScore.add(resultSet.getBigDecimal("popScore"));
             }
             preparedStatement = this.conn.prepareStatement("SELECT round(DATEDIFF(?, CheckIn)/180, 2) AS popScore FROM Reservations LEFT JOIN Rooms ON Reservations.RoomCode = Rooms.CODE WHERE CheckIn < ? AND CheckOut > ? AND Rooms.CODE = ?");
-            preparedStatement.setString(1, today);
-            preparedStatement.setString(2, today);
-            preparedStatement.setString(3, today);
+            preparedStatement.setDate(1, Date.valueOf(current_date));
+            preparedStatement.setDate(2, Date.valueOf(current_date));
+            preparedStatement.setDate(3, Date.valueOf(current_date));
             preparedStatement.setString(4, code);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 popScore = popScore.add(resultSet.getBigDecimal("popScore"));
             }
             preparedStatement = this.conn.prepareStatement("SELECT round(DATEDIFF(CheckOut, DATE(? - INTERVAL 180 DAY))/180, 2) AS popScore FROM Reservations LEFT JOIN Rooms ON Reservations.RoomCode = Rooms.CODE WHERE CheckOut > DATE(? - INTERVAL 180 DAY) AND CheckIn < DATE(? - INTERVAL 180 DAY) AND Rooms.CODE = ?");
-            preparedStatement.setString(1, today);
-            preparedStatement.setString(2, today);
-            preparedStatement.setString(3, today);
+            preparedStatement.setDate(1, Date.valueOf(current_date));
+            preparedStatement.setDate(2, Date.valueOf(current_date));
+            preparedStatement.setDate(3, Date.valueOf(current_date));
             preparedStatement.setString(4, code);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {

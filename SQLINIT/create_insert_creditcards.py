@@ -29,7 +29,7 @@ with open(reservations_path) as csv_file:
 for i in range(1, len(dict)+1, 1):
     sql += 'INSERT INTO CreditCards (\n\t'
     sql += 'Balance, CardLimit, OwnerID\n\t) VALUES (\n\t\t'
-    sql += str(0) + ', ' + str(100) + ', ' + str(i) + '\n\t);\n'
+    sql += str(0) + ', ' + str(10000) + ', ' + str(i) + '\n\t);\n'
 
 # write sql code to file
 sql_file = open('creditcards.sql', 'w')
